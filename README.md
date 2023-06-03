@@ -58,6 +58,12 @@ The objective of the game is to destroy all the bricks by hitting them with the 
 ![GameConsole_arkanoid_1.png](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_arkanoid_1.png)
 ![GameConsole_arkanoid_2.png](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_arkanoid_2.png)
 
+## Tiny Pacman
+Tiny Pacman was originally developed by [Daniel Champagne](https://www.tinyjoypad.com/) for the ATtiny85. The player controls a round character called Pacman, who must navigate through a maze filled with pellets and various types of enemies, known as ghosts. The objective of the game is for Pacman to eat all the pellets in the maze while avoiding the ghosts.
+
+![GameConsole_pacman_1.png](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_pacman_1.png)
+![GameConsole_pacman_3.png](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_pacman_3.png)
+
 # Compiling and Uploading Firmware
 ## Programming and Debugging Devices
 To program the CH32V003 microcontroller, you will need a special programming device which utilizes the proprietary single-wire serial debug interface (SDI). The [WCH-LinkE](http://www.wch-ic.com/products/WCH-Link.html) (pay attention to the "E" in the name) is a suitable device for this purpose and can be purchased commercially for around $3. This debugging tool is not only compatible with the CH32V003 but also with other WCH RISC-V and ARM-based microcontrollers.
