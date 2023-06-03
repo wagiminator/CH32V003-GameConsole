@@ -36,7 +36,7 @@ extern "C" {
 // Sound enable
 #define JOY_SOUND   1     // 0: no sound, 1: with sound
 
-// Slow-down delay
+// Game slow-down delay
 #define JOY_SLOWDOWN()    //DLY_ms(10)
 
 // Init driver
