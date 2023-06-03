@@ -3,29 +3,12 @@ Mini Game Console utilizing the CH32V003J4M6 ultra-cheap (10 cents by the time o
 
 ![GameConsole_pic1.jpg](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_pic1.jpg)
 
-# The CH32V003 Family of 32-bit RISC-V Microcontrollers
-## Overview
+# Hardware
+## Schematic
+![GameConsole_wiring.png](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_wiring.png)
+
+## The CH32V003 Family of 32-bit RISC-V Microcontrollers
 The CH32V003 series is a collection of industrial-grade general-purpose microcontrollers that utilize the QingKe RISC-V2A core design supporting the RV32EC instruction set. These microcontrollers are equipped with various features such as a 48MHz system main frequency, wide voltage support, a single-wire serial debug interface, low power consumption, and an ultra-small package. Additionally, the CH32V003 series includes a built-in set of components including a DMA controller, a 10-bit ADC, op-amp comparators, multiple timers, and standard communication interfaces such as USART, I2C, and SPI.
-
-## Block Diagram
-![CH32V003_block.png](https://raw.githubusercontent.com/wagiminator/Development-Boards/main/CH32V003F4P6_DevBoard/documentation/CH32V003_block.png)
-
-## Features
-- QingKe 32-bit RISC-V2A processor, supporting 2 levels of interrupt nesting
-- Maximum 48MHz system main frequency
-- 2KB SRAM, 16KB Flash
-- Power supply voltage: 3.3/5V
-- Multiple low-power modes: Sleep, Standby
-- Power on/off reset, programmable voltage detector
-- 1 group of 1-channel general-purpose DMA controller
-- 1 group of op-amp comparator
-- 1 group of 10-bit ADC
-- 1×16-bit advanced-control timer, 1×16-bit general-purpose timer
-- 2 WDOG, 1×32-bit SysTick
-- 1 USART interface, 1 group of I2C interface, 1 group of SPI interface
-- 18 I/O ports, mapping an external interrupt
-- 64-bit chip unique ID
-- Single-wire serial debug interface (SDI)
 
 # Games
 ## Tiny Invaders
@@ -72,45 +55,43 @@ To program the CH32V003 microcontroller, you will need a special programming dev
 
 As part of his [ch32v003fun](https://github.com/cnlohr/ch32v003fun) project, Charles Lohr has also developed open-source programmers/debuggers based on STM32F042 and ESP32S2. Furthermore, the schematic diagram of the WCH-LinkE based on the CH32V305F is available on the manufacturer's [website](https://www.wch.cn/products/WCH-Link.html), but the [firmware](https://github.com/openwch/ch32v003) can only be downloaded as a binary file.
 
-WCH offers free but closed-source software options for the PC side, such as [WCH-LinkUtility](https://www.wch.cn/downloads/WCH-LinkUtility_ZIP.html). Alternatively, a customized version of [OpenOCD](https://github.com/karlp/openocd-hacks) can be used for uploading firmware. More information can be found [here](https://github.com/wuxx/nanoCH32V003).
+To upload the firmware, you need to ensure that the Game Console is switched off or the battery is removed. Then, you should make the following connections to the WCH-LinkE:
 
-Additionally, there is a platform-independent open-source tool called minichlink developed by Charles Lohr (CNLohr), which can be found [here](https://github.com/cnlohr/ch32v003fun/tree/master/minichlink). This software tool is also used here and is part of the game folders (Linux only).
+```
+WCH-LinkE     GameConsole
++-------+      +-------+
+|  SWDIO| <--> |DIO    |
+|    3V3| ---> |3V3    |
+|    GND| ---> |GND    |
++-------+      +-------+
+```
 
+## Compiling and Uploading (Linux)
 To use the WCH-LinkE on Linux, you need to grant access permissions beforehand by executing the following commands:
 ```
 echo 'SUBSYSTEM=="usb", ATTR{idVendor}=="1a86", ATTR{idProduct}=="8010", MODE="666"' | sudo tee /etc/udev/rules.d/99-WCH-LinkE.rules
 sudo udevadm control --reload-rules
 ```
 
-To upload firmware and perform debugging, you need to ensure that the Game Console is disconnected from any power sources. Then, you should make the following connections to the WCH-LinkE:
-
-```
-WCH-LinkE      DevBoard
-+-------+      +------+
-|  SWDIO| <--> |DIO   |
-|    3V3| ---> |3V3   |
-|    GND| ---> |GND   |
-+-------+      +------+
-```
-
-## Software Development Tools
-The Eclipse-based closed-source [MounRiver Studio IDE](http://www.mounriver.com/) is the official development environment provided by WCH. It supports Windows, Linux, and Mac. MounRiver Studio can be downloaded for free.
-
-You can download a complete open-source toolchain (GCC and OpenOCD) for Linux and Mac from the MounRiver Studio website. However, the provided games here are based on the [ch32v003fun](https://github.com/cnlohr/ch32v003fun) project by CNLohr. Follow the instructions on the Github page to install the toolchain.
-
-There are also projects around to make the CH32V003 compatible with the [Arduino IDE](https://github.com/AlexanderMandera/arduino-wch32v003) and [PlatformIO](https://github.com/Community-PIO-CH32V/platform-ch32v).
-
-## Compiling and Uploading (Linux)
-Install the GCC compiler:
+Install the GCC compiler, if you want to compile the firmware yourself:
 ```
 sudo apt install build-essential libnewlib-dev gcc-riscv64-unknown-elf libusb-1.0-0-dev libudev-dev
 ```
 
-Switch off the Game Console or remove the battery. Connect the Console via the 3-pin header to the programming device. Open a terminal and navigate to the folder with the makefile. Run the following command:
-
+Switch off the Game Console or remove the battery. Connect the Console via the 3-pin header to the programming device. Open a terminal and navigate to the folder with the makefile. Run the following command to compile and upload:
 ```
 make flash
 ```
+
+If you want to just upload the pre-compiled binary, run the following command instead:
+```
+./tools/minichlink -w <firmware>.bin flash -b
+```
+
+## Uploading Firmware Binary (Windows/Mac)
+WCH offers the free but closed-source software [WCH-LinkUtility](https://www.wch.cn/downloads/WCH-LinkUtility_ZIP.html) to upload the precompiled binary with Windows. Select the "WCH-LinkRV" mode in the software, open the <firmware>.bin file and upload it to the microcontroller.
+
+Alternatively, there is a platform-independent open-source tool called minichlink developed by Charles Lohr (CNLohr), which can be found [here](https://github.com/cnlohr/ch32v003fun/tree/master/minichlink). It can be used with Windows, Linux and Mac.
 
 # References, Links and Notes
 - [EasyEDA Design Files](https://oshwlab.com/wagiminator)
