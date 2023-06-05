@@ -27,7 +27,6 @@
 // Modified to work with CH32V003 by Stefan Wagner: https://github.com/wagiminator
 // ===================================================================================
 
-
 #include <driver.h>           // TinyJoypad conversion driver
 #include <spritebank.h>       // grafix
 

@@ -1,21 +1,39 @@
 // ===================================================================================
-// Basic System Functions for CH32V003                                        * v1.0 *
+// Basic System Functions for CH32V003                                        * v1.1 *
 // ===================================================================================
-
+//
 // This file must be included!!!!
+//
+// References:
+// -----------
+// - CNLohr ch32v003fun: https://github.com/cnlohr/ch32v003fun
+// - WCH Nanjing Qinheng Microelectronics: http://wch.cn
+
 #include "system.h"
 
+// ===================================================================================
 // Setup microcontroller (this function is called automatically at startup)
+// ===================================================================================
 void SYS_init(void) {
-  // Init clocks
-  CLK_init();                           // init system clock
-  STK_init();                           // init SYSTICK
+  // Init system clock
+  #if SYS_CLK_INIT > 0
+  CLK_init();
+  #endif
+
+  // Init SYSTICK
+  #if SYS_TICK_INIT > 0
+  STK_init();
+  #endif
 
   // Enable GPIO
   #if SYS_GPIO_EN > 0
   RCC->APB2PCENR |= RCC_IOPAEN | RCC_IOPCEN | RCC_IOPDEN;
   #endif
 }
+
+// ===================================================================================
+// Clock functions
+// ===================================================================================
 
 // Init internal oscillator (non PLL) as system clock source
 void CLK_init_HSI(void) {
@@ -53,7 +71,7 @@ void CLK_init_HSE_PLL(void) {
   RCC->APB2PCENR |= RCC_AFIOEN;                                 // enable auxiliary clock module
   AFIO->PCFR1    |= AFIO_PCFR1_PA12_REMAP;                      // pins PA1-PA2 for external crystal
   RCC->CTLR       = RCC_HSION | RCC_HSEON | RCC_PLLON;          // enable HSE and keep HSI+PLL on
-  while(!(RCC->CTLR&RCC_HSERDY));
+  while(!(RCC->CTLR & RCC_HSERDY));                             // wait till HSE is ready
   RCC->CFGR0      = RCC_SW_HSE | RCC_HPRE_DIV1;                 // HCLK = SYSCLK = APB1 and use HSE for system clock
   FLASH->ACTLR    = FLASH_ACTLR_LATENCY_1;                      // 1 cycle latency
   RCC->CTLR       = RCC_HSEON;                                  // turn off PLL and HSI
@@ -71,11 +89,19 @@ void MCO_init(void) {
   GPIOC->CFGLR   |=   0b1011<<(4<<2);
 }
 
+// ===================================================================================
+// Delay functions
+// ===================================================================================
+
 // Wait n counts of SysTick
 void DLY_ticks(uint32_t n) {
   uint32_t end = STK->CNT + n;
   while(((int32_t)(STK->CNT - end)) < 0 );
 }
+
+// ===================================================================================
+// Independent watchdog timer (IWDG) functions
+// ===================================================================================
 
 // Start independent watchdog timer (IWDG) with given time in milliseconds (max 8191).
 // Once the IWDG has been started, it cannot be disabled, only reloaded (feed).
@@ -98,6 +124,10 @@ void IWDG_reload(uint16_t ms) {
   IWDG->RLDR = ms >> 1;                 // set watchdog counter reload value
   IWDG->CTLR = 0xAAAA;                  // load reload value into watchdog counter
 }
+
+// ===================================================================================
+// Sleep functions
+// ===================================================================================
 
 // Init automatic wake-up timer
 void AWU_init(void) {
@@ -136,9 +166,11 @@ void STDBY_WFE_now(void) {
   PFIC->SCTLR &= ~PFIC_SLEEPDEEP;       // unset deep sleep mode
 }
 
+// ===================================================================================
 // C version of CH32V003 Startup .s file from WCH
 // This file is public domain where possible or the following where not:
 // Copyright 2023 Charles Lohr, under the MIT-x11 or NewBSD licenses, you choose.
+// ===================================================================================
 int main(void) __attribute__((used));
 
 extern uint32_t * _sbss;
@@ -154,33 +186,33 @@ void DefaultIRQHandler(void) {
 
 // This makes it so that all of the interrupt handlers just alias to
 // DefaultIRQHandler unless they are individually overridden.
-void NMI_Handler(void)                   __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void HardFault_Handler( void )           __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void SysTick_Handler( void )             __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void SW_Handler( void )                  __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void WWDG_IRQHandler( void )             __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void PVD_IRQHandler( void )              __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void FLASH_IRQHandler( void )            __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void RCC_IRQHandler( void )              __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void EXTI7_0_IRQHandler( void )          __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void AWU_IRQHandler( void )              __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void DMA1_Channel1_IRQHandler( void )    __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void DMA1_Channel2_IRQHandler( void )    __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void DMA1_Channel3_IRQHandler( void )    __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void DMA1_Channel4_IRQHandler( void )    __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void DMA1_Channel5_IRQHandler( void )    __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void DMA1_Channel6_IRQHandler( void )    __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void DMA1_Channel7_IRQHandler( void )    __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void ADC1_IRQHandler( void )             __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void I2C1_EV_IRQHandler( void )          __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void I2C1_ER_IRQHandler( void )          __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void USART1_IRQHandler( void )           __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void SPI1_IRQHandler( void )             __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void TIM1_BRK_IRQHandler( void )         __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void TIM1_UP_IRQHandler( void )          __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void TIM1_TRG_COM_IRQHandler( void )     __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void TIM1_CC_IRQHandler( void )          __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void TIM2_IRQHandler( void )             __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
+void NMI_Handler(void)                  __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
+void HardFault_Handler( void )          __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
+void SysTick_Handler( void )            __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
+void SW_Handler( void )                 __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
+void WWDG_IRQHandler( void )            __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
+void PVD_IRQHandler( void )             __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
+void FLASH_IRQHandler( void )           __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
+void RCC_IRQHandler( void )             __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
+void EXTI7_0_IRQHandler( void )         __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
+void AWU_IRQHandler( void )             __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
+void DMA1_Channel1_IRQHandler( void )   __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
+void DMA1_Channel2_IRQHandler( void )   __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
+void DMA1_Channel3_IRQHandler( void )   __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
+void DMA1_Channel4_IRQHandler( void )   __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
+void DMA1_Channel5_IRQHandler( void )   __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
+void DMA1_Channel6_IRQHandler( void )   __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
+void DMA1_Channel7_IRQHandler( void )   __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
+void ADC1_IRQHandler( void )            __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
+void I2C1_EV_IRQHandler( void )         __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
+void I2C1_ER_IRQHandler( void )         __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
+void USART1_IRQHandler( void )          __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
+void SPI1_IRQHandler( void )            __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
+void TIM1_BRK_IRQHandler( void )        __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
+void TIM1_UP_IRQHandler( void )         __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
+void TIM1_TRG_COM_IRQHandler( void )    __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
+void TIM1_CC_IRQHandler( void )         __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
+void TIM2_IRQHandler( void )            __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
 
 void InterruptVector(void)              __attribute__((naked)) __attribute((section(".init"))) __attribute((weak,alias("InterruptVectorDefault")));
 void InterruptVectorDefault(void)       __attribute__((naked)) __attribute((section(".init")));
@@ -188,6 +220,7 @@ void InterruptVectorDefault(void)       __attribute__((naked)) __attribute((sect
 void InterruptVectorDefault(void) {
 	asm volatile( "\n\
 	.align  2\n\
+	.option   push;\n\
 	.option   norvc;\n\
 	j handle_reset\n\
 	.word   0\n\
@@ -228,7 +261,8 @@ void InterruptVectorDefault(void) {
 	.word   TIM1_UP_IRQHandler        /* TIM1 Update */                    \n\
 	.word   TIM1_TRG_COM_IRQHandler   /* TIM1 Trigger and Commutation */   \n\
 	.word   TIM1_CC_IRQHandler        /* TIM1 Capture Compare */           \n\
-	.word   TIM2_IRQHandler           /* TIM2 */                           \n");
+	.word   TIM2_IRQHandler           /* TIM2 */                           \n\
+	.option   pop;\n");
 }
 
 void handle_reset(void) {
@@ -248,7 +282,8 @@ void handle_reset(void) {
 	csrw 0x804, a3\n\
 	la a0, InterruptVector\n\
 	or a0, a0, a3\n\
-	csrw mtvec, a0\n" );
+	csrw mtvec, a0\n" 
+	: : : "a0", "a3", "memory");
 
 	// Careful: Use registers to prevent overwriting of self-data.
 	// This clears out BSS.
@@ -271,7 +306,16 @@ asm volatile(
 	addi a0, a0, 4\n\
 	addi a1, a1, 4\n\
 	bne a1, a2, 1b\n\
-2:\n" );
+2:\n"
+#ifdef CPLUSPLUS
+	// Call __libc_init_array function
+"	call %0 \n\t"
+: : "i" (__libc_init_array)
+#else
+: :
+#endif
+: "a0", "a1", "a2", "a3", "memory"
+);
 
   SYS_init();
 
@@ -280,3 +324,30 @@ asm volatile(
 "	csrw mepc, %[main]\n"
 "	mret\n" : : [main]"r"(main) );
 }
+
+// ===================================================================================
+// C++ Support
+// ===================================================================================
+#ifdef CPLUSPLUS
+// This is required to allow pure virtual functions to be defined.
+extern void __cxa_pure_virtual() { while (1); }
+
+// These magic symbols are provided by the linker.
+extern void (*__preinit_array_start[]) (void) __attribute__((weak));
+extern void (*__preinit_array_end[]) (void) __attribute__((weak));
+extern void (*__init_array_start[]) (void) __attribute__((weak));
+extern void (*__init_array_end[]) (void) __attribute__((weak));
+
+void __libc_init_array(void) {
+  size_t count;
+  size_t i;
+
+  count = __preinit_array_end - __preinit_array_start;
+  for (i = 0; i < count; i++)
+  __preinit_array_start[i]();
+
+  count = __init_array_end - __init_array_start;
+  for (i = 0; i < count; i++)
+  __init_array_start[i]();
+}
+#endif

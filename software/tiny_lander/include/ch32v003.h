@@ -1,5 +1,5 @@
 // ===================================================================================
-// Header file for CH32V003                                                   * v1.0 *
+// Header file for CH32V003                                                   * v1.1 *
 // ===================================================================================
 // This contains a copy of ch32v00x.h and core_riscv.h and other misc functions.
 // NOTE: This file includes modifications by CNLohr.
@@ -17,7 +17,23 @@
  *******************************************************************************/
  
 #pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
+
+/* MCU definitions */
+#define __MPU_PRESENT             0  /* Other CH32 devices does not provide an MPU */
+#define __Vendor_SysTickConfig    0  /* Set to 1 if different SysTick Config is used */
+
+#define HSE_VALUE                 ((uint32_t)24000000)  /* Value of the external oscillator in Hz */
+#define HSI_VALUE                 ((uint32_t)24000000)  /* Value of the internal oscillator in Hz */
+#define LSI_VALUE                 ((uint32_t)  128000)  /* Value of the internal low-speed oscillator in Hz */
+#define HSE_STARTUP_TIMEOUT       ((uint16_t)  0x2000)  /* Time out for HSE start up */
+#define HSITRIM                   0x10                  /* HSI TRIM value */
+
 
 /* IO definitions */
 #ifdef __cplusplus
@@ -44,24 +60,6 @@
 #elif defined(__TASKING__)
   #define __ASM       __asm   /*!< asm keyword for TASKING Compiler      */
   #define __INLINE    inline  /*!< inline keyword for TASKING Compiler   */
-#endif
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#define __MPU_PRESENT             0  /* Other CH32 devices does not provide an MPU */
-#define __Vendor_SysTickConfig    0  /* Set to 1 if different SysTick Config is used */
-
-#define HSE_VALUE                 ((uint32_t)24000000) /* Value of the External oscillator in Hz */
-
-/* In the following line adjust the External High Speed oscillator (HSE) Startup Timeout value */
-#define HSE_STARTUP_TIMEOUT       ((uint16_t)0x2000) /* Time out for HSE start up */
-
-#define HSI_VALUE                 ((uint32_t)24000000) /* Value of the Internal oscillator in Hz */
-
-#ifndef HSITRIM
-    #define HSITRIM 0x10
 #endif
 
 typedef enum {NoREADY = 0, READY = !NoREADY} ErrorStatus;

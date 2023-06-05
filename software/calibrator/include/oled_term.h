@@ -16,11 +16,12 @@
 // 2022 by Stefan Wagner: https://github.com/wagiminator
 
 #pragma once
-#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include "i2c_tx.h"
 
 void OLED_init(void);           // OLED init function
 void OLED_clear(void);          // OLED clear screen

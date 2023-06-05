@@ -14,11 +14,12 @@
 // 2022 by Stefan Wagner: https://github.com/wagiminator
 
 #pragma once
-#include "i2c_tx.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include "i2c_tx.h"
 
 // OLED definitions
 #define OLED_ADDR         0x78    // OLED write address (0x3C << 1)

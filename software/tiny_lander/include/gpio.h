@@ -46,19 +46,32 @@
 // ADC_read()               Sample and read ADC value (0..1023)
 // ADC_read_VDD()           Sample and read supply voltage (VDD) in millivolts (mV)
 //
+// OPA_enable()             Enable OPA comparator
+// OPA_disable()            Disable OPA comparator
+// OPA_negative(PIN)        Set OPA inverting input PIN (PA1, PD0 only)
+// OPA_positive(PIN)        Set OPA non-inverting input PIN (PA2, PD7 only)
+// OPA_output()             Enable OPA output (push-pull) on pin PD4
+// OPA_output_OD()          Enable OPA output (open-drain) on pin PD4
+// OPA_read()               Read OPA output (0: pos < neg, 1: pos > neg)
+//
 // Notes:
 // ------
-// Pins used for ADC must be set with PIN_input_AN beforehand. Only the following 
-// PINS can be used as INPUT for the ADC: PA1, PA2, PC4, PD2, PD3, PD4, PD5, PD6.
+// - Pins used for ADC must be set with PIN_input_AN beforehand. Only the following 
+//   pins can be used as INPUT for the ADC: PA1, PA2, PC4, PD2, PD3, PD4, PD5, PD6.
+// - Pins used as input for OPA comparator must be set with PIN_input_AN beforehand.
+//   Only the following pins can be used for the OPA: PA1 or PD0 as negative
+//   (inverting) input, PA2 or PD7 as positive (non-inverting) input and PD4 as
+//   ouput.
 //
 // 2023 by Stefan Wagner:   https://github.com/wagiminator
 
 #pragma once
-#include "ch32v003.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include "ch32v003.h"
 
 // ===================================================================================
 // Enumerate PIN designators (use these designators to define pins)
@@ -227,6 +240,7 @@ enum{ PA0, PA1, PA2, PA3, PA4, PA5, PA6, PA7,
 
 #define ADC_input_VREF()    ADC1->RSQR3 = 8
 #define ADC_input_VCAL()    ADC1->RSQR3 = 9
+
 #define ADC_input(PIN) \
   (PIN == PA1 ? (ADC1->RSQR3 = 1) : \
   (PIN == PA2 ? (ADC1->RSQR3 = 0) : \
@@ -257,6 +271,48 @@ static inline uint16_t ADC_read_VDD(void) {
   ADC_input_VREF();                             // set VREF as ADC input
   return((uint32_t)1200 * 1023 / ADC_read());   // return VDD im mV
 }
+
+// ===================================================================================
+// OPA Functions
+// ===================================================================================
+#define OPA_enable()        EXTEN->EXTEN_CTR |=  EXTEN_OPA_EN
+#define OPA_disable()       EXTEN->EXTEN_CTR &= ~EXTEN_OPA_EN
+#define OPA_read()          ((GPIOD->INDR >> 4) & 1)
+
+#define OPA_negative(PIN) \
+  (PIN == PA1 ? (EXTEN->EXTEN_CTR &= ~EXTEN_OPA_NSEL) : \
+  (PIN == PD0 ? (EXTEN->EXTEN_CTR |=  EXTEN_OPA_NSEL) : \
+(0)))
+
+#define OPA_positive(PIN) \
+  (PIN == PA2 ? (EXTEN->EXTEN_CTR &= ~EXTEN_OPA_PSEL) : \
+  (PIN == PD7 ? (EXTEN->EXTEN_CTR |=  EXTEN_OPA_PSEL) : \
+(0)))
+
+#define OPA_output() {                 \
+  RCC->APB2PCENR |=   RCC_AFIOEN;      \
+  GPIOD->CFGLR   &= ~(0b1111<<(4<<2)); \
+  GPIOD->CFGLR   |=   0b1001<<(4<<2);  \
+}
+
+#define OPA_output_OD() {              \
+  RCC->APB2PCENR |=   RCC_AFIOEN;      \
+  GPIOD->CFGLR   &= ~(0b1111<<(4<<2)); \
+  GPIOD->CFGLR   |=   0b1101<<(4<<2);  \
+}
+
+#define OPA_output_PP       OPA_output
+
+// ===================================================================================
+// CMP Functions
+// ===================================================================================
+#define CMP_enable          OPA_enable
+#define CMP_disable         OPA_disable
+#define CMP_negative        OPA_negative
+#define CMP_positive        OPA_positive
+#define CMP_output          OPA_output
+#define CMP_output_PP       OPA_output_PP
+#define CMP_output_OD       OPA_output_OD
 
 #ifdef __cplusplus
 };

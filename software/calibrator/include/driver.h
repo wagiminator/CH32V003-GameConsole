@@ -6,14 +6,16 @@
 // 2023 by Stefan Wagner:   https://github.com/wagiminator
 
 #pragma once
-#include <stdbool.h>
-#include "system.h"
-#include "gpio.h"
-#include "oled_term.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include <stdint.h>
+#include <stdbool.h>
+#include "system.h"
+#include "gpio.h"
+#include "oled_term.h"
 
 // Pin assignments
 #define PIN_ACT     PA2   // pin connected to fire button

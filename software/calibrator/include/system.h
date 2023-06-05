@@ -1,5 +1,5 @@
 // ===================================================================================
-// Basic System Functions for CH32V003                                        * v1.0 *
+// Basic System Functions for CH32V003                                        * v1.1 *
 // ===================================================================================
 //
 // This file must be included!!! The system configuration and the system clock are 
@@ -45,19 +45,31 @@
 // STDBY_WFE_now()        // put device into standby (deep sleep), wake by event
 // AWU_init()             // init automatic wake-up timer
 // AWU_set(n)             // set automatic wake-up timer for n milliseconds
+//
+// References:
+// -----------
+// - CNLohr ch32v003fun: https://github.com/cnlohr/ch32v003fun
+// - WCH Nanjing Qinheng Microelectronics: http://wch.cn
 
 #pragma once
-#include <stdint.h>
-#include "ch32v003.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+#include "ch32v003.h"
+
+// ===================================================================================
 // System options (set "1" to activate)
-#define SYS_GPIO_EN       1         // 1: enable GPIO on startup
+// ===================================================================================
+#define SYS_CLK_INIT      1         // 1: init system clock on startup
+#define SYS_TICK_INIT     1         // 1: init and start SYSTICK on startup
+#define SYS_GPIO_EN       1         // 1: enable GPIO ports on startup
 #define SYS_USE_HSE       0         // 1: use external crystal
 
+// ===================================================================================
+// Sytem clock defines
+// ===================================================================================
 // Set system clock frequency
 #ifndef F_CPU
   #define F_CPU           48000000  // 48Mhz if not otherwise defined
@@ -79,10 +91,11 @@ extern "C" {
 #elif F_CPU ==  4000000
   #define CLK_DIV         RCC_HPRE_DIV6
 #else
-  #warning Unsupported system clock frequency, using internal 24MHz
+  #warning Unsupported system clock frequency, using internal 48MHz
   #define CLK_DIV         RCC_HPRE_DIV1
+  #define SYS_USE_PLL
   #undef  F_CPU
-  #define F_CPU           24000000
+  #define F_CPU           48000000
 #endif
 
 #if SYS_USE_HSE > 0
@@ -99,7 +112,9 @@ extern "C" {
   #endif
 #endif
 
-// System clock functions
+// ===================================================================================
+// Clock functions
+// ===================================================================================
 void CLK_init_HSI(void);      // init internal oscillator (non PLL) as system clock source
 void CLK_init_HSI_PLL(void);  // init internal oscillator with PLL as system clock source
 void CLK_init_HSE(void);      // init external crystal (non PLL) as system clock source
@@ -118,7 +133,9 @@ void CLK_init_HSE_PLL(void);  // init external crystal (PLL) as system clock sou
 #define MCO_stop()        RCC->CFGR0 &= ~RCC_CFGR0_MCO  // stop clock output to pin PC4
 void MCO_init(void);                                    // init clock output to pin PC4
 
+// ===================================================================================
 // Delay functions
+// ===================================================================================
 #define STK_init()        STK->CTLR = STK_CTLR_STE | STK_CTLR_STCLK // init SYSTICK @ F_CPU
 #define DLY_US_TIME       (F_CPU / 1000000)             // system ticks per us
 #define DLY_MS_TIME       (F_CPU / 1000)                // system ticks per ms
@@ -126,7 +143,9 @@ void MCO_init(void);                                    // init clock output to 
 #define DLY_ms(n)         DLY_ticks((n) * DLY_MS_TIME)  // delay n milliseconds
 void DLY_ticks(uint32_t n);                             // delay n system ticks
 
+// ===================================================================================
 // Reset functions
+// ===================================================================================
 #define RST_now()         PFIC->CFGR    = PFIC_RESETSYS | PFIC_KEY3
 #define RST_clearFlags()  RCC->RSTSCKR |= RCC_PINRSTF
 #define RST_wasLowPower() (RCC->RSTSCKR & RCC_LPWRRSTF)
@@ -136,12 +155,16 @@ void DLY_ticks(uint32_t n);                             // delay n system ticks
 #define RST_wasPower()    (RCC->RSTSCKR & RCC_PORRSTF)
 #define RST_wasPin()      (RCC->RSTSCKR & RCC_PORRSTF)
 
+// ===================================================================================
 // Independent watchdog timer (IWDG) functions
+// ===================================================================================
 void IWDG_start(uint16_t ms);                           // start IWDG with time in ms
 void IWDG_reload(uint16_t ms);                          // reload IWDG with time in ms
 #define IWDG_feed()       IWDG->CTLR = 0xAAAA           // feed the dog (reload time)
 
+// ===================================================================================
 // Sleep functions
+// ===================================================================================
 void SLEEP_WFI_now(void);   // put device into sleep, wake up by interrupt
 void SLEEP_WFE_now(void);   // put device into sleep, wake up by event
 void STDBY_WFI_now(void);   // put device into standby (deep sleep), wake up interrupt
@@ -160,10 +183,15 @@ void STDBY_WFE_now(void);   // put device into standby (deep sleep), wake up eve
   (0)))))))))
 void AWU_init(void);       // init automatic wake-up timer
 
+// ===================================================================================
 // Reset and interrupt handler
+// ===================================================================================
 void handle_reset(void)        __attribute__((naked)) __attribute((section(".text.handle_reset"))) __attribute__((used));
 void DefaultIRQHandler(void)   __attribute__((section(".text.vector_handler"))) __attribute__((naked)) __attribute__((used));
 
+// ===================================================================================
+// Imported system functions
+// ===================================================================================
 // Enable Global Interrupt
 static inline void __enable_irq(void) {
   uint32_t result;

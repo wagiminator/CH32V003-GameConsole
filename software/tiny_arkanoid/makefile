@@ -17,18 +17,19 @@ LINKER   = linker
 F_CPU    = 12000000
 
 # Toolchain
-CC       = riscv64-unknown-elf-gcc
-OBJCOPY  = riscv64-unknown-elf-objcopy
-OBJDUMP  = riscv64-unknown-elf-objdump
-OBJSIZE  = riscv64-unknown-elf-size
+PREFIX   = riscv64-unknown-elf
+CC       = $(PREFIX)-gcc
+OBJCOPY  = $(PREFIX)-objcopy
+OBJDUMP  = $(PREFIX)-objdump
+OBJSIZE  = $(PREFIX)-size
 FLASHER  = ./tools/minichlink -w $(TARGET).bin flash -b
-CLEAN    = rm -f *.lst *.obj *.cof *.list *.map *.eep.hex *.o *.s *.d
+CLEAN    = rm -f *.lst *.obj *.cof *.list *.map *.eep.hex *.o *.d
 
 # Compiler Flags
 CFLAGS   = -g -Os -flto -ffunction-sections -static-libgcc -march=rv32ec -mabi=ilp32e
 CFLAGS  += -I/usr/include/newlib -I$(INCLUDE) -I. -DF_CPU=$(F_CPU) -nostdlib  -Wall
 LDFLAGS  = -T$(LINKER)/ch32v003.ld -Wl,--gc-sections -L$(LINKER) -lgcc
-CFILES   = $(SKETCH) $(wildcard $(INCLUDE)/*.c)
+CFILES   = $(SKETCH) $(wildcard $(INCLUDE)/*.c) $(wildcard $(INCLUDE)/*.s)
 
 # Symbolic Targets
 help:

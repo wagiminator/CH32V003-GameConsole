@@ -6,12 +6,12 @@
 // 2023 by Stefan Wagner:   https://github.com/wagiminator
 
 #pragma once
-#include <stdint.h>
-#include "ch32v003.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include "ch32v003.h"
 
 // I2C Definitions
 #define I2C_CLKRATE   400000    // I2C bus clock rate (Hz)
