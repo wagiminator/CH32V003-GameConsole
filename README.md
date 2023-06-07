@@ -66,10 +66,13 @@ WCH-LinkE     GameConsole
 +-------+      +-------+
 ```
 
+If the blue LED stays on after plugging in the WCH-LinkE into the USB port, then the device is in ARM mode and needs to be switched to the Risc-V mode first. This can be done by selecting the "WCH-LinkRV" mode using the software provided by WCH (MounRiver Studio or WCH-LinkUtility). Alternatively, the ModeS button on the device can be held down while plugging it into the USB port. More information can be found in the [WCH-Link User Manual](http://www.wch-ic.com/downloads/WCH-LinkUserManual_PDF.html).
+
 ## Compiling and Uploading (Linux)
 To use the WCH-LinkE on Linux, you need to grant access permissions beforehand by executing the following commands:
 ```
 echo 'SUBSYSTEM=="usb", ATTR{idVendor}=="1a86", ATTR{idProduct}=="8010", MODE="666"' | sudo tee /etc/udev/rules.d/99-WCH-LinkE.rules
+echo 'SUBSYSTEM=="usb", ATTR{idVendor}=="1a86", ATTR{idProduct}=="8012", MODE="666"' | sudo tee -a /etc/udev/rules.d/99-WCH-LinkE.rules
 sudo udevadm control --reload-rules
 ```
 
@@ -98,6 +101,7 @@ Alternatively, there is a platform-independent open-source tool called minichlin
 - [DanielC: Tinyjoypad](https://www.tinyjoypad.com/)
 - [CNLohr: ch32003fun](https://github.com/cnlohr/ch32v003fun)
 - [WCH: CH32V003 datasheets](http://www.wch-ic.com/products/CH32V003.html)
+- [WCH: WCH-Link user manual](http://www.wch-ic.com/downloads/WCH-LinkUserManual_PDF.html)
 - [WCH: Official Store on AliExpress](https://wchofficialstore.aliexpress.com)
 
 # License
