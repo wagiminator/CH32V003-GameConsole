@@ -66,7 +66,7 @@ WCH-LinkE     GameConsole
 +-------+      +-------+
 ```
 
-If the blue LED stays on after plugging in the WCH-LinkE into the USB port, then the device is in ARM mode and needs to be switched to the Risc-V mode first. This can be done by selecting the "WCH-LinkRV" mode using the software provided by WCH (MounRiver Studio or WCH-LinkUtility). Alternatively, the ModeS button on the device can be held down while plugging it into the USB port. More information can be found in the [WCH-Link User Manual](http://www.wch-ic.com/downloads/WCH-LinkUserManual_PDF.html).
+If the blue LED on the WCH-LinkE stays on after plugging it into the USB port, then the device is in ARM mode and needs to be switched to RISC-V mode first. This can be done by selecting "WCH-LinkRV" using the software provided by WCH (MounRiver Studio or WCH-LinkUtility). Alternatively, the ModeS button on the device can be held down while plugging it into the USB port. More information can be found in the [WCH-Link User Manual](http://www.wch-ic.com/downloads/WCH-LinkUserManual_PDF.html).
 
 ## Compiling and Uploading (Linux)
 To use the WCH-LinkE on Linux, you need to grant access permissions beforehand by executing the following commands:
