@@ -1,6 +1,9 @@
 # CH32V003 RISC-V Mini Game Console
 Mini Game Console utilizing the CH32V003J4M6 ultra-cheap (10 cents by the time of writing) 32-bit RISC-V microcontroller, an SSD1306 128x64 pixels OLED display and CR/LIR2032 coin cell battery holder.
 
+- Project Video (YouTube): https://youtu.be/1W7Z0BodhWk
+- PCB Design Files (EasyEDA): https://oshwlab.com/wagiminator/ch32v003j4m6-game-console
+
 ![GameConsole_pic1.jpg](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_pic1.jpg)
 
 # Hardware
@@ -103,6 +106,8 @@ Alternatively, there is a platform-independent open-source tool called minichlin
 - [WCH: CH32V003 datasheets](http://www.wch-ic.com/products/CH32V003.html)
 - [WCH: WCH-Link user manual](http://www.wch-ic.com/downloads/WCH-LinkUserManual_PDF.html)
 - [WCH: Official Store on AliExpress](https://wchofficialstore.aliexpress.com)
+
+![GameConsole_pic2.jpg](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_pic2.jpg)
 
 # License
 
