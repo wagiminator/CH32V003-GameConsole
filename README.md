@@ -94,10 +94,20 @@ If you want to just upload the pre-compiled binary, run the following command in
 ./tools/minichlink -w <firmware>.bin flash -b
 ```
 
+If you have installed [Python3](https://www.pythontutorial.net/getting-started/install-python/) and [pyusb](https://github.com/pyusb/pyusb) on your system, you can also use the included Python tool rvprog.py:
+```
+python3 ./tools/rvprog.py <firmware>.bin
+```
+
 ## Uploading Firmware Binary (Windows/Mac)
 WCH offers the free but closed-source software [WCH-LinkUtility](https://www.wch.cn/downloads/WCH-LinkUtility_ZIP.html) to upload the precompiled binary with Windows. Select the "WCH-LinkRV" mode in the software, open the <firmware>.bin file and upload it to the microcontroller.
 
 Alternatively, there is a platform-independent open-source tool called minichlink developed by Charles Lohr (CNLohr), which can be found [here](https://github.com/cnlohr/ch32v003fun/tree/master/minichlink). It can be used with Windows, Linux and Mac.
+
+If you have installed [Python3](https://www.pythontutorial.net/getting-started/install-python/) and [pyusb](https://github.com/pyusb/pyusb) on your system, you can also use the included Python tool rvprog.py:
+```
+python ./tools/rvprog.py <firmware>.bin
+```
 
 # References, Links and Notes
 - [EasyEDA Design Files](https://oshwlab.com/wagiminator)

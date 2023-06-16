@@ -1,14 +1,33 @@
-# minichlink
+# CH32V003 + WCH-LinkE Programming Tools
+## WCH-LinkE
+To program the CH32V003 microcontroller, you will need a special programming device which utilizes the proprietary single-wire serial debug interface (SDI). The [WCH-LinkE](http://www.wch-ic.com/products/WCH-Link.html) (pay attention to the "E" in the name) is a suitable device for this purpose and can be purchased commercially for around $3. This debugging tool is not only compatible with the CH32V003 but also with other WCH RISC-V and ARM-based microcontrollers.
 
-A free, open mechanism to use the CH-LinkE $4 programming dongle for the CH32V003.
-
-If on Linux, be sure to type make sure to install the `99-WCH-LinkE.rules` build rule to `/etc/udev/rules.d/`
+To use the WCH-LinkE on Linux, you need to grant access permissions beforehand by executing the following commands:
+```
+echo 'SUBSYSTEM=="usb", ATTR{idVendor}=="1a86", ATTR{idProduct}=="8010", MODE="666"' | sudo tee /etc/udev/rules.d/99-WCH-LinkE.rules
+sudo udevadm control --reload-rules
+```
 
 On Windows, if you need to you can install the WinUSB driver over the WCH interface 1.
 
-The exe here is about 12kB and contains everything except for the libusb driver.  In Linux you need `libusb-1.0-dev`.
+To upload firmware, you should make the following connections to the WCH-LinkE:
 
-## Usage
+```
+WCH-LinkE      MCU Board
++-------+      +-------+
+|  SWDIO| <--> |DIO    |
+|    3V3| ---> |3V3    |
+|    GND| ---> |GND    |
++-------+      +-------+
+```
+
+If the blue LED on the WCH-LinkE stays on after plugging it into the USB port, then the device is in ARM mode and needs to be switched to RISC-V mode first. This can be done by selecting "WCH-LinkRV" in the software provided by WCH (MounRiver Studio or WCH-LinkUtility). Alternatively, the ModeS button on the device can be held down while plugging it into the USB port. More information can be found in the [WCH-Link User Manual](http://www.wch-ic.com/downloads/WCH-LinkUserManual_PDF.html).
+
+## WCH-LinkUtility
+WCH offers the free but closed-source software [WCH-LinkUtility](https://www.wch.cn/downloads/WCH-LinkUtility_ZIP.html) to upload firmware with Windows.
+
+## minichlink
+Minichlink by CNLohr provides a free, open mechanism to use the WCH-LinkE programming dongle for the CH32V003. It works with Windows, Linux and Mac. The x86-64 Linux binary is provided in this folder, the source code can by found on the [developer's Github page](https://github.com/cnlohr/ch32v003fun/tree/master/minichlink).
 
 ```
 Usage: minichlink [args]
@@ -32,4 +51,18 @@ Usage: minichlink [args]
    For filename, you can use - for raw or + for hex.
  -T is a terminal. This MUST be the last argument.
 ```
- 
+
+## rvprog.py
+You can also use rvprog.py, a simple Python tool provided in this folder, to flash CH32V003 microcontrollers using the WCH-LinkE or compatible programmers/debuggers. The code for this tool is largely derived from CNLohr's minichlink.
+
+In order for this tool to work, Python3 must be installed on your system. To do this, follow these [instructions](https://www.pythontutorial.net/getting-started/install-python/). In addition [pyusb](https://github.com/pyusb/pyusb) must be installed. On Linux (Debian-based), all of this can be done with the following commands:
+
+```
+sudo apt install python3 python3-pip
+python3 -m pip install pyusb
+```
+
+```
+Usage example:
+python3 rvprog.py firmware.bin
+```
