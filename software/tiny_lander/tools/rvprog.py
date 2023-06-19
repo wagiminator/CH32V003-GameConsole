@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # ===================================================================================
-# Project:   rvprog - Programming Tool for WCH_LinkE and CH32V003
-# Version:   v1.0
+# Project:   rvprog - Programming Tool for WCH-LinkE and CH32V003
+# Version:   v1.1
 # Year:      2023
 # Author:    Stefan Wagner
 # Github:    https://github.com/wagiminator
@@ -19,64 +19,163 @@
 #
 # Dependencies:
 # -------------
-# - pyusb
+# - PyUSB
 #
 # Operating Instructions:
 # -----------------------
-# You need to install pyusb to use rvprog. Install it via "python -m pip install pyusb".
+# You need to install PyUSB to use rvprog. Install it via "python -m pip install pyusb".
 #
 # Linux users need permission to access the device. Run:
 # echo 'SUBSYSTEM=="usb", ATTR{idVendor}=="1a86", ATTR{idProduct}=="8010", MODE="666"' | sudo tee /etc/udev/rules.d/99-WCH-LinkE.rules
+# echo 'SUBSYSTEM=="usb", ATTR{idVendor}=="1a86", ATTR{idProduct}=="8012", MODE="666"' | sudo tee -a /etc/udev/rules.d/99-WCH-LinkE.rules
 # sudo udevadm control --reload-rules
 #
-# Connect the WCH-LinkE to your PC and to your CH32V003 board. The WCH_LinkE must be 
-# in LinkRV-mode (blue LED off)!
-# Run "python rvprog.py firmware.bin".
+# Connect the WCH-LinkE to your PC and to your CH32V003 board. The WCH-LinkE must be 
+# in LinkRV mode (blue LED off)! If not, run: python rvprog.py -v
+# Run:
+# - python rvprog.py [-h] [-e] [-f BIN] [-g] [-G] [-u]
+#   -h, --help                show help message and exit
+#   -a, --armmode             switch WCH-LinkE to ARM mode
+#   -v, --rvmode              switch WCH-LinkE to RISC-V mode
+#   -u, --unlock              unlock (unbrick) chip
+#   -e, --erase               perform a whole chip erase
+#   -p, --pingpio             make nRST pin a GPIO pin
+#   -P, --pinreset            make nRST pin a reset pin
+#   -f FLASH, --flash FLASH   write BIN file to flash
+#
+# - Example:
+#   python rvprog.py -f firmware.bin
 
 
 import usb.core
 import usb.util
 import sys
-
-# USB device settings
-CH_VENDOR_ID   = 0x1A86    # VID
-CH_PRODUCT_ID  = 0x8010    # PID
-CH_PACKET_SIZE = 1024      # packet size
-CH_INTERFACE   = 0         # interface number
-CH_EP_OUT      = 0x01      # endpoint for data transfer out
-CH_EP_IN       = 0x81      # endpoint for data transfer in
-CH_TIMEOUT     = 5000      # timeout for USB operations
+import time
+import argparse
 
 # ===================================================================================
 # Main Function
 # ===================================================================================
 
 def _main():
-    if len(sys.argv) != 2:
-        sys.stderr.write('ERROR: No bin file selected!\n')
-        sys.exit(1)
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(description='Minimal command line'
+                                     ' interface for CH32V003 programming')
+    parser.add_argument("-a", "--armmode", action="store_true",
+                        help="switch WCH-LinkE to ARM mode")
+    parser.add_argument("-v", "--rvmode", action="store_true",
+                        help="switch WCH-LinkE to RISC-V mode")
+    parser.add_argument("-u", "--unlock", action="store_true",
+                        help="unlock (unbrick) chip")
+    parser.add_argument("-e", "--erase", action="store_true",
+                        help="perform a whole chip erase")
+    parser.add_argument("-p", "--pingpio", action="store_true",
+                        help="make nRST pin a GPIO pin")
+    parser.add_argument("-P", "--pinreset", action="store_true",
+                        help="make nRST pin a reset pin")
+    parser.add_argument('-f', '--flash', help='write BIN file to flash')
+    args = parser.parse_args(sys.argv[1:])
 
+    # Check arguments
+    if not any( (args.armmode, args.erase, args.flash, args.pingpio, args.pinreset, args.unlock, args.rvmode) ):
+        print('No arguments - no action!')
+        sys.exit(0)
+
+    # Switch device to RISC-V mode
     try:
-        print('Connecting to WCH_LinkE ...')
+        if args.rvmode:
+            print('Searching for WCH-Link in ARM mode ...')
+            armlink = usb.core.find(idVendor = CH_VENDOR_ID, idProduct = 0x8012)
+            if armlink is None:
+                raise Exception('No WCH-Link in ARM mode found!')
+            print('SUCCESS: Found WCH-Link in ARM mode.')
+            print('Switching WCH-Link to RISC-V mode ...')
+            armlink.write(0x02, b'\x81\xff\x01\x52')
+            time.sleep(2)
+            print('DONE.')
+
+    except Exception as ex:
+        if str(ex) != '':
+            sys.stderr.write('ERROR: ' + str(ex) + '!\n')
+
+    # Establish connection to WCH-LinkE
+    try:
+        print('Searching for WCH-LinkE in RISC-V mode ...')
         isp = Programmer()
-        isp.connect()
-        print('FOUND: WCH-LinkE v' + isp.linkversion + ' connected to CH32V003.')
-
-        isp.sethaltmode(0)
-        print('Flashing', sys.argv[1], 'to CH32V003 ...')
-        with open(sys.argv[1], 'rb') as f: data = f.read()
-        isp.flash_data(data)
-        print('SUCCESS:', len(data), 'bytes written.')
-        print('Verifying ...')
-        isp.verify_data(data)
-        print('SUCCESS:', len(data), 'bytes verified.')
-
-        isp.exit()
-        isp.sethaltmode(1)
+        print('SUCCESS: Found WCH-LinkE v' + isp.linkversion + ' in RISC-V mode.')
     except Exception as ex:
         if str(ex) != '':
             sys.stderr.write('ERROR: ' + str(ex) + '!\n')
         sys.exit(1)
+
+    # Establish connection to CH32V003
+    try:
+        if any( (args.erase, args.flash, args.pingpio, args.pinreset, args.unlock) ):
+            print('Connecting to MCU ...')
+            isp.connect()
+            print('SUCCESS: Connected to CH32V003.')
+    except Exception as ex:
+        if str(ex) != '':
+            sys.stderr.write('ERROR: ' + str(ex) + '!\n')
+        isp.exit()
+        sys.exit(1)
+
+    # Performing actions
+    try:
+        # Unlock chip
+        if args.unlock:
+            print('Unlocking chip ...')
+            isp.unbrick()
+            print('SUCCESS: Chip is unlocked.')
+
+        # Perform chip erase
+        if args.erase:
+            isp.sethaltmode(0)
+            print('Performing whole chip erase ...')
+            isp.erasechip()
+            print('SUCCESS: Chip is erased.')
+
+        # Flash binary file
+        if args.flash is not None:
+            isp.sethaltmode(0)
+            print('Flashing', args.flash, 'to CH32V003 ...')
+            with open(args.flash, 'rb') as f: data = f.read()
+            isp.flash_data(data)
+            print('SUCCESS:', len(data), 'bytes written.')
+            print('Verifying ...')
+            isp.verify_data(data)
+            print('SUCCESS:', len(data), 'bytes verified.')
+
+        # Make nRST pin a normal GPIO pin
+        if args.pingpio:
+            isp.sethaltmode(0)
+            print('Configuring nRST pin as GPIO ...')
+            isp.setnrstasgpio(1)
+            print('SUCCESS: nRST pin is now a GPIO pin.')
+
+        # Make nRST pin a reset pin
+        if args.pinreset:
+            isp.sethaltmode(0)
+            print('Configuring nRST pin as reset ...')
+            isp.setnrstasgpio(1)
+            print('SUCCESS: nRST pin is now a reset pin.')
+
+        # Switch device to ARM mode
+        if args.armmode:
+            print('Switching device to ARM mode ...')
+            isp.exit()
+            isp.dev.write(CH_EP_OUT, b'\x81\xff\x01\x41')
+            print('DONE: Check if blue LED lights up!')
+            sys.exit(0)
+
+        isp.exit()
+
+    except Exception as ex:
+        isp.exit()
+        if str(ex) != '':
+            sys.stderr.write('ERROR: ' + str(ex) + '!\n')
+        sys.exit(1)
+
     print('DONE.')
     sys.exit(0)
 
@@ -85,38 +184,33 @@ def _main():
 # ===================================================================================
 
 class Programmer:
+    # Init programmer
     def __init__(self):
+        # Find programmer
         self.dev = usb.core.find(idVendor = CH_VENDOR_ID, idProduct = CH_PRODUCT_ID)
         if self.dev is None:
-            raise Exception('WCH-Link not found. Check if device is in RV-mode')
+            raise Exception('WCH-LinkE not found. Check if device is in RISC-V mode')
 
-    # Connect programmer to MCU
-    def connect(self):
-        # clear in buffer
+        # Clear receive buffer
         self.clearreply()
 
-        # put mcu on hold
-        self.sendcommand((0x81, 0x0D, 0x01, 0x03))
-
-        # put mcu in reset
+        # Get programmer info
         reply = self.sendcommand((0x81, 0x0D, 0x01, 0x01))
         if reply[5] != 18:
           raise Exception('Programmer is not a WCH-LinkE')
         self.linkversion = str(reply[3]) + '.' + str(reply[4])
 
-        # not sure if this is needed
-        self.sendcommand((0x81, 0x0C, 0x02, 0x09, 0x01))
-
-        # put mcu to hold to allow debugger to run
+    # Connect programmer to MCU
+    def connect(self):
+        # Put MCU to hold to allow debugger to run
         reply = self.sendcommand((0x81, 0x0D, 0x01, 0x02))
         if len(reply) < 8 or reply[:4] == (0x81, 0x55, 0x01, 0x01):
           raise Exception('No MCU is connected to device')
         self.chiptype = (reply[4]<<4) + (reply[5]>>4)
         if self.chiptype != 0x003:
-          self.exit()
           raise Exception('Target MCU is not a CH32V003')
 
-        # for some reason, it's better to do this
+        # For some reason, it's better to do this
         self.writereg(DMCONTROL,      0x80000001)
         self.writereg(DMCONTROL,      0x80000001)
         self.writereg(DMCONTROL,      0x80000001)
@@ -124,10 +218,10 @@ class Programmer:
         self.writereg(DMABSTRACTAUTO, 0x00000000)
         self.writereg(DMCOMMAND,      0x00261000)
 
-        # read some chip data (maybe someday this will become useful)
-        reply = self.sendcommand((0x81, 0x11, 0x01, 0x09))
+        # Read some chip data (maybe someday this will become useful)
+        #reply = self.sendcommand((0x81, 0x11, 0x01, 0x09))
 
-        # setup internal flags
+        # Setup internal flags
         self.statetag       = 'STRT'
         self.stateval       = -1
         self.haltmode       = -1
@@ -198,6 +292,7 @@ class Programmer:
 
     # Disconnect from MCU
     def exit(self):
+        self.sendcommand((0x81, 0x0D, 0x01, 0x03))
         self.sendcommand((0x81, 0x0D, 0x01, 0xFF))
 
     #--------------------------------------------------------------
@@ -462,23 +557,23 @@ class Programmer:
         return blob
 
     # Write data blob to flash, 64-byte aligned
-    def writebinaryblob(self, offset, data):
-        if self.flashunlocked < 1:
-            self.unlockflash()
+    def writebinaryblob(self, addr, data):
+        if addr & 63:
+            raise Exception('Blob is not 64-byte aligned')
         data = self.pad_data(data, 64)
         pages = self.page_data(data, 64)
         for page in pages:
-            base = offset
+            base = addr
             self.erasepage(base)
             self.writeword(0x40022010, 1<<16)
             self.writeword(0x40022010, (1<<16) | (1<<19))
             self.waitforflash()
             for x in range(0, 64, 4):
                 value32 = int.from_bytes(page[x:x+4], byteorder='little')
-                self.writeword(offset, value32)
+                self.writeword(addr, value32)
                 self.writeword(0x40022010, (1<<16) | (1<<18))
                 self.waitforflash()
-                offset += 4
+                addr += 4
             self.writeword(0x40022014, base)
             self.writeword(0x40022010,  (1<<16) | (1<<6))
             self.waitforflash()
@@ -516,33 +611,43 @@ class Programmer:
 # Debug Protocol Constants
 # ===================================================================================
 
-DMDATA0          = 0x04
-DMDATA1          = 0x05
-DMCONTROL        = 0x10
-DMSTATUS         = 0x11
-DMHARTINFO       = 0x12
-DMABSTRACTCS     = 0x16
-DMCOMMAND        = 0x17
-DMABSTRACTAUTO   = 0x18
-DMPROGBUF0       = 0x20
-DMPROGBUF1       = 0x21
-DMPROGBUF2       = 0x22
-DMPROGBUF3       = 0x23
-DMPROGBUF4       = 0x24
-DMPROGBUF5       = 0x25
-DMPROGBUF6       = 0x26
-DMPROGBUF7       = 0x27
+# USB device settings
+CH_VENDOR_ID    = 0x1A86    # VID
+CH_PRODUCT_ID   = 0x8010    # PID
+CH_PACKET_SIZE  = 1024      # packet size
+CH_INTERFACE    = 0         # interface number
+CH_EP_OUT       = 0x01      # endpoint for data transfer out
+CH_EP_IN        = 0x81      # endpoint for data transfer in
+CH_TIMEOUT      = 5000      # timeout for USB operations
 
-DMCPBR           = 0x7C
-DMCFGR           = 0x7D
-DMSHDWCFGR       = 0x7E
+# Debug registers
+DMDATA0         = 0x04
+DMDATA1         = 0x05
+DMCONTROL       = 0x10
+DMSTATUS        = 0x11
+DMHARTINFO      = 0x12
+DMABSTRACTCS    = 0x16
+DMCOMMAND       = 0x17
+DMABSTRACTAUTO  = 0x18
+DMPROGBUF0      = 0x20
+DMPROGBUF1      = 0x21
+DMPROGBUF2      = 0x22
+DMPROGBUF3      = 0x23
+DMPROGBUF4      = 0x24
+DMPROGBUF5      = 0x25
+DMPROGBUF6      = 0x26
+DMPROGBUF7      = 0x27
 
-CH_RAM_BASE      = 0x20000000
-CH_RAM_SIZE      = 2048
-CH_CODE_BASE     = 0x08000000
-CH_CODE_SIZE     = 16384
-CB_BOOT_BASE     = 0x1FFFF000
-CH_BOOT_SIZE     = 1920
+DMCPBR          = 0x7C
+DMCFGR          = 0x7D
+DMSHDWCFGR      = 0x7E
+
+# Memory constants
+CH_RAM_BASE     = 0x20000000
+CH_RAM_SIZE     = 2048
+CH_CODE_BASE    = 0x08000000
+CH_CODE_SIZE    = 16384
+CB_BOOT_BASE    = 0x1FFFF00
 
 # ===================================================================================
 

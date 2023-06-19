@@ -5,6 +5,7 @@ To program the CH32V003 microcontroller, you will need a special programming dev
 To use the WCH-LinkE on Linux, you need to grant access permissions beforehand by executing the following commands:
 ```
 echo 'SUBSYSTEM=="usb", ATTR{idVendor}=="1a86", ATTR{idProduct}=="8010", MODE="666"' | sudo tee /etc/udev/rules.d/99-WCH-LinkE.rules
+echo 'SUBSYSTEM=="usb", ATTR{idVendor}=="1a86", ATTR{idProduct}=="8012", MODE="666"' | sudo tee -a /etc/udev/rules.d/99-WCH-LinkE.rules
 sudo udevadm control --reload-rules
 ```
 
@@ -21,7 +22,12 @@ WCH-LinkE      MCU Board
 +-------+      +-------+
 ```
 
-If the blue LED on the WCH-LinkE stays on after plugging it into the USB port, then the device is in ARM mode and needs to be switched to RISC-V mode first. This can be done by selecting "WCH-LinkRV" in the software provided by WCH (MounRiver Studio or WCH-LinkUtility). Alternatively, the ModeS button on the device can be held down while plugging it into the USB port. More information can be found in the [WCH-Link User Manual](http://www.wch-ic.com/downloads/WCH-LinkUserManual_PDF.html).
+If the blue LED on the WCH-LinkE remains illuminated once it is connected to the USB port, it means that the device is currently in ARM mode and must be switched to RISC-V mode initially. There are a few ways to accomplish this:
+- You can utilize the Python tool called rvmode.py (refer to the instructions below).
+- Alternatively, you can select "WCH-LinkRV" in the software provided by WCH, such as MounRiver Studio or WCH-LinkUtility.
+- Another option is to hold down the ModeS button on the device while plugging it into the USB port.
+
+More information can be found in the [WCH-Link User Manual](http://www.wch-ic.com/downloads/WCH-LinkUserManual_PDF.html).
 
 ## WCH-LinkUtility
 WCH offers the free but closed-source software [WCH-LinkUtility](https://www.wch.cn/downloads/WCH-LinkUtility_ZIP.html) to upload firmware with Windows.
@@ -50,12 +56,15 @@ Usage: minichlink [args]
    Note: for memory addresses, you can use 'flash' 'launcher' 'bootloader' 'option' 'ram' and say "ram+0x10" for instance
    For filename, you can use - for raw or + for hex.
  -T is a terminal. This MUST be the last argument.
+
+Example:
+minichlink -w firmware.bin flash -b
 ```
 
 ## rvprog.py
 You can also use rvprog.py, a simple Python tool provided in this folder, to flash CH32V003 microcontrollers using the WCH-LinkE or compatible programmers/debuggers. The code for this tool is largely derived from CNLohr's minichlink.
 
-In order for this tool to work, Python3 must be installed on your system. To do this, follow these [instructions](https://www.pythontutorial.net/getting-started/install-python/). In addition [pyusb](https://github.com/pyusb/pyusb) must be installed. On Linux (Debian-based), all of this can be done with the following commands:
+In order for this tool to work, Python3 must be installed on your system. To do this, follow these [instructions](https://www.pythontutorial.net/getting-started/install-python/). In addition [PyUSB](https://github.com/pyusb/pyusb) must be installed. On Linux (Debian-based), all of this can be done with the following commands:
 
 ```
 sudo apt install python3 python3-pip
@@ -63,6 +72,25 @@ python3 -m pip install pyusb
 ```
 
 ```
+Usage: rvprog.py [-h] [-a] [-v] [-u] [-e] [-p] [-P] [-f FLASH]
+
+Optional arguments:
+  -h, --help                show help message and exit
+  -a, --armmode             switch WCH-LinkE to ARM mode
+  -v, --rvmode              switch WCH-LinkE to RISC-V mode
+  -u, --unlock              unlock (unbrick) chip
+  -e, --erase               perform a whole chip erase
+  -p, --pingpio             make nRST pin a GPIO pin
+  -P, --pinreset            make nRST pin a reset pin
+  -f FLASH, --flash FLASH   write BIN file to flash
+
+Example:
+python3 rvprog.py -f firmware.bin
+```
+
+## rvmode.py
+The Python tool rvmode.py, which can be found in this folder, provides a simple way to switch the WCH-LinkE to RISC-V mode (LinkRV mode). Python3 and PyUSB must be installed on your system for the tool to work.
+```
 Usage example:
-python3 rvprog.py firmware.bin
+python3 rvmode.py
 ```

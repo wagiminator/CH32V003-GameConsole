@@ -69,7 +69,12 @@ WCH-LinkE     GameConsole
 +-------+      +-------+
 ```
 
-If the blue LED on the WCH-LinkE stays on after plugging it into the USB port, then the device is in ARM mode and needs to be switched to RISC-V mode first. This can be done by selecting "WCH-LinkRV" using the software provided by WCH (MounRiver Studio or WCH-LinkUtility). Alternatively, the ModeS button on the device can be held down while plugging it into the USB port. More information can be found in the [WCH-Link User Manual](http://www.wch-ic.com/downloads/WCH-LinkUserManual_PDF.html).
+If the blue LED on the WCH-LinkE remains illuminated once it is connected to the USB port, it means that the device is currently in ARM mode and must be switched to RISC-V mode initially. There are a few ways to accomplish this:
+- You can utilize the Python tool called rvmode.py, which is provided with the games in the software folder.
+- Alternatively, you can select "WCH-LinkRV" in the software provided by WCH, such as MounRiver Studio or WCH-LinkUtility.
+- Another option is to hold down the ModeS button on the device while plugging it into the USB port.
+
+More information can be found in the [WCH-Link User Manual](http://www.wch-ic.com/downloads/WCH-LinkUserManual_PDF.html).
 
 ## Compiling and Uploading (Linux)
 To use the WCH-LinkE on Linux, you need to grant access permissions beforehand by executing the following commands:
@@ -81,7 +86,7 @@ sudo udevadm control --reload-rules
 
 Install the GCC compiler, if you want to compile the firmware yourself:
 ```
-sudo apt install build-essential libnewlib-dev gcc-riscv64-unknown-elf libusb-1.0-0-dev libudev-dev
+sudo apt install build-essential libnewlib-dev gcc-riscv64-unknown-elf
 ```
 
 Switch off the Game Console or remove the battery. Connect the Console via the 3-pin header to the programming device. Open a terminal and navigate to the folder with the makefile. Run the following command to compile and upload:
@@ -94,9 +99,9 @@ If you want to just upload the pre-compiled binary, run the following command in
 ./tools/minichlink -w <firmware>.bin flash -b
 ```
 
-If you have installed [Python3](https://www.pythontutorial.net/getting-started/install-python/) and [pyusb](https://github.com/pyusb/pyusb) on your system, you can also use the included Python tool rvprog.py:
+If you have installed [Python3](https://www.pythontutorial.net/getting-started/install-python/) and [PyUSB](https://github.com/pyusb/pyusb) on your system, you can also use the included Python tool rvprog.py:
 ```
-python3 ./tools/rvprog.py <firmware>.bin
+python3 ./tools/rvprog.py -f <firmware>.bin
 ```
 
 ## Uploading Firmware Binary (Windows/Mac)
@@ -106,7 +111,7 @@ Alternatively, there is a platform-independent open-source tool called minichlin
 
 If you have installed [Python3](https://www.pythontutorial.net/getting-started/install-python/) and [pyusb](https://github.com/pyusb/pyusb) on your system, you can also use the included Python tool rvprog.py:
 ```
-python ./tools/rvprog.py <firmware>.bin
+python ./tools/rvprog.py -f <firmware>.bin
 ```
 
 # References, Links and Notes
