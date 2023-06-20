@@ -59,20 +59,13 @@ import argparse
 
 def _main():
     # Parse command line arguments
-    parser = argparse.ArgumentParser(description='Minimal command line'
-                                     ' interface for CH32V003 programming')
-    parser.add_argument("-a", "--armmode", action="store_true",
-                        help="switch WCH-LinkE to ARM mode")
-    parser.add_argument("-v", "--rvmode", action="store_true",
-                        help="switch WCH-LinkE to RISC-V mode")
-    parser.add_argument("-u", "--unlock", action="store_true",
-                        help="unlock (unbrick) chip")
-    parser.add_argument("-e", "--erase", action="store_true",
-                        help="perform a whole chip erase")
-    parser.add_argument("-p", "--pingpio", action="store_true",
-                        help="make nRST pin a GPIO pin")
-    parser.add_argument("-P", "--pinreset", action="store_true",
-                        help="make nRST pin a reset pin")
+    parser = argparse.ArgumentParser(description='Minimal command line interface for CH32V003 programming')
+    parser.add_argument('-a', '--armmode',  action='store_true', help='switch WCH-Link to ARM mode')
+    parser.add_argument('-v', '--rvmode',   action='store_true', help='switch WCH-Link to RISC-V mode')
+    parser.add_argument('-u', '--unlock',   action='store_true', help='unlock (unbrick) chip')
+    parser.add_argument('-e', '--erase',    action='store_true', help='perform a whole chip erase')
+    parser.add_argument('-p', '--pingpio',  action='store_true', help='make nRST pin a GPIO pin')
+    parser.add_argument('-P', '--pinreset', action='store_true', help='make nRST pin a reset pin')
     parser.add_argument('-f', '--flash', help='write BIN file to flash')
     args = parser.parse_args(sys.argv[1:])
 
@@ -81,7 +74,7 @@ def _main():
         print('No arguments - no action!')
         sys.exit(0)
 
-    # Switch device to RISC-V mode
+    # Switch WCH-Link to RISC-V mode
     try:
         if args.rvmode:
             print('Searching for WCH-Link in ARM mode ...')
@@ -95,8 +88,7 @@ def _main():
             print('DONE.')
 
     except Exception as ex:
-        if str(ex) != '':
-            sys.stderr.write('ERROR: ' + str(ex) + '!\n')
+        sys.stderr.write('ERROR: ' + str(ex) + '!\n')
 
     # Establish connection to WCH-LinkE
     try:
@@ -104,8 +96,7 @@ def _main():
         isp = Programmer()
         print('SUCCESS: Found WCH-LinkE v' + isp.linkversion + ' in RISC-V mode.')
     except Exception as ex:
-        if str(ex) != '':
-            sys.stderr.write('ERROR: ' + str(ex) + '!\n')
+        sys.stderr.write('ERROR: ' + str(ex) + '!\n')
         sys.exit(1)
 
     # Establish connection to CH32V003
@@ -115,8 +106,7 @@ def _main():
             isp.connect()
             print('SUCCESS: Connected to CH32V003.')
     except Exception as ex:
-        if str(ex) != '':
-            sys.stderr.write('ERROR: ' + str(ex) + '!\n')
+        sys.stderr.write('ERROR: ' + str(ex) + '!\n')
         isp.exit()
         sys.exit(1)
 
@@ -157,12 +147,12 @@ def _main():
         if args.pinreset:
             isp.sethaltmode(0)
             print('Configuring nRST pin as reset ...')
-            isp.setnrstasgpio(1)
+            isp.setnrstasgpio(0)
             print('SUCCESS: nRST pin is now a reset pin.')
 
         # Switch device to ARM mode
         if args.armmode:
-            print('Switching device to ARM mode ...')
+            print('Switching WCH-Link to ARM mode ...')
             isp.exit()
             isp.dev.write(CH_EP_OUT, b'\x81\xff\x01\x41')
             print('DONE: Check if blue LED lights up!')
@@ -171,9 +161,8 @@ def _main():
         isp.exit()
 
     except Exception as ex:
+        sys.stderr.write('ERROR: ' + str(ex) + '!\n')
         isp.exit()
-        if str(ex) != '':
-            sys.stderr.write('ERROR: ' + str(ex) + '!\n')
         sys.exit(1)
 
     print('DONE.')
@@ -189,21 +178,21 @@ class Programmer:
         # Find programmer
         self.dev = usb.core.find(idVendor = CH_VENDOR_ID, idProduct = CH_PRODUCT_ID)
         if self.dev is None:
-            raise Exception('WCH-LinkE not found. Check if device is in RISC-V mode')
+            raise Exception('WCH-Link not found. Check if device is in RISC-V mode')
 
         # Clear receive buffer
         self.clearreply()
 
         # Get programmer info
-        reply = self.sendcommand((0x81, 0x0D, 0x01, 0x01))
+        reply = self.sendcommand(b'\x81\x0d\x01\x01')
         if reply[5] != 18:
           raise Exception('Programmer is not a WCH-LinkE')
         self.linkversion = str(reply[3]) + '.' + str(reply[4])
 
     # Connect programmer to MCU
     def connect(self):
-        # Put MCU to hold to allow debugger to run
-        reply = self.sendcommand((0x81, 0x0D, 0x01, 0x02))
+        # Put MCU to hold to allow debugger to run. Get target MCU type.
+        reply = self.sendcommand(b'\x81\x0d\x01\x02')
         if len(reply) < 8 or reply[:4] == (0x81, 0x55, 0x01, 0x01):
           raise Exception('No MCU is connected to device')
         self.chiptype = (reply[4]<<4) + (reply[5]>>4)
@@ -216,10 +205,11 @@ class Programmer:
         self.writereg(DMCONTROL,      0x80000001)
         self.writereg(DMABSTRACTCS,   0x00000700)
         self.writereg(DMABSTRACTAUTO, 0x00000000)
-        self.writereg(DMCOMMAND,      0x00261000)
+        self.writereg(DMCOMMAND,      0x00221000)
+        self.waitopdone()
 
         # Read some chip data (maybe someday this will become useful)
-        #reply = self.sendcommand((0x81, 0x11, 0x01, 0x09))
+        reply = self.sendcommand(b'\x81\x11\x01\x09')
 
         # Setup internal flags
         self.statetag       = 'STRT'
@@ -256,7 +246,7 @@ class Programmer:
 
     # Unlock MCU
     def unbrick(self):
-        self.sendcommand((0x81, 0x0D, 0x01, 0x0F, 0x09))
+        self.sendcommand(b'\x81\x0d\x01\x0f\x09')
 
     # Configure read protection (0=unprotect, 1=protect)
     def setreadprotect(self, state):
@@ -274,26 +264,26 @@ class Programmer:
             self.sendcommand(b'\x81\x0b\x01\x01')
         else:
             self.sendcommand(b'\x81\x06\x08\x02\xf7\xff\xff\xff\xff\xff\xff')
-            self.sendcommand(b'"\x81\x0b\x01\x01')
+            self.sendcommand(b'\x81\x0b\x01\x01')
 
     # Enable/disable programmer's 3V3 output
     def control3v3(self, state):
         if state:
-            self.sendcommand((0x81, 0x0D, 0x01, 0x09))
+            self.sendcommand(b'\x81\x0d\x01\x09')
         else:
-            self.sendcommand((0x81, 0x0D, 0x01, 0x0A))
+            self.sendcommand(b'\x81\x0d\x01\x0a')
 
     # Enable/disable programmer's 5V output
     def control5v(self, state):
         if state:
-            self.sendcommand((0x81, 0x0D, 0x01, 0x0B))
+            self.sendcommand(b'\x81\x0d\x01\x0b')
         else:
-            self.sendcommand((0x81, 0x0D, 0x01, 0x0C))
+            self.sendcommand(b'\x81\x0d\x01\x0c')
 
     # Disconnect from MCU
     def exit(self):
-        self.sendcommand((0x81, 0x0D, 0x01, 0x03))
-        self.sendcommand((0x81, 0x0D, 0x01, 0xFF))
+        self.sendcommand(b'\x81\x0d\x01\x03')
+        self.sendcommand(b'\x81\x0d\x01\xff')
 
     #--------------------------------------------------------------
 
