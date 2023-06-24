@@ -572,8 +572,11 @@ class Programmer:
     #--------------------------------------------------------------
 
     # Pad data so that there are full pages
-    def pad_data(self, data, blocksize):
-        return data + b'\xff' * (len(data) % blocksize)
+    def pad_data(self, data, pagesize):
+        if (len(data) % pagesize) == 0:
+            return data
+        else:
+            return data + b'\xff' * (pagesize - (len(data) % pagesize))
 
     # Divide data into pages
     def page_data(self, data, size):

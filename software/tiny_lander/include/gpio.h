@@ -1,5 +1,5 @@
 // ===================================================================================
-// Basic GPIO Functions for CH32V003                                          * v1.1 *
+// Basic GPIO Functions for CH32V003                                          * v1.2 *
 // ===================================================================================
 //
 // Pins must be defined as PA0, PA1, .., PC0, PC1, etc. - e.g.:
@@ -249,7 +249,7 @@ enum{ PA0, PA1, PA2, PA3, PA4, PA5, PA6, PA7,
   (PIN == PD3 ? (ADC1->RSQR3 = 4) : \
   (PIN == PD4 ? (ADC1->RSQR3 = 7) : \
   (PIN == PD5 ? (ADC1->RSQR3 = 5) : \
-  (PIN == PA6 ? (ADC1->RSQR3 = 6) : \
+  (PIN == PD6 ? (ADC1->RSQR3 = 6) : \
 (0)))))))))
 
 static inline void ADC_init(void) {

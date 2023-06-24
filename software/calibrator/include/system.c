@@ -1,5 +1,5 @@
 // ===================================================================================
-// Basic System Functions for CH32V003                                        * v1.1 *
+// Basic System Functions for CH32V003                                        * v1.2 *
 // ===================================================================================
 //
 // This file must be included!!!!
@@ -8,11 +8,13 @@
 // -----------
 // - CNLohr ch32v003fun: https://github.com/cnlohr/ch32v003fun
 // - WCH Nanjing Qinheng Microelectronics: http://wch.cn
+//
+// 2023 by Stefan Wagner:   https://github.com/wagiminator
 
 #include "system.h"
 
 // ===================================================================================
-// Setup microcontroller (this function is called automatically at startup)
+// Setup Microcontroller (this function is called automatically at startup)
 // ===================================================================================
 void SYS_init(void) {
   // Init system clock
@@ -32,7 +34,7 @@ void SYS_init(void) {
 }
 
 // ===================================================================================
-// Clock functions
+// System Clock Functions
 // ===================================================================================
 
 // Init internal oscillator (non PLL) as system clock source
@@ -90,7 +92,7 @@ void MCO_init(void) {
 }
 
 // ===================================================================================
-// Delay functions
+// Delay Functions
 // ===================================================================================
 
 // Wait n counts of SysTick
@@ -100,7 +102,7 @@ void DLY_ticks(uint32_t n) {
 }
 
 // ===================================================================================
-// Independent watchdog timer (IWDG) functions
+// Independent Watchdog Timer (IWDG) Functions
 // ===================================================================================
 
 // Start independent watchdog timer (IWDG) with given time in milliseconds (max 8191).
@@ -126,7 +128,7 @@ void IWDG_reload(uint16_t ms) {
 }
 
 // ===================================================================================
-// Sleep functions
+// Sleep Functions
 // ===================================================================================
 
 // Init automatic wake-up timer
@@ -167,55 +169,78 @@ void STDBY_WFE_now(void) {
 }
 
 // ===================================================================================
+// C++ Support
+// Based on CNLohr ch32v003fun: https://github.com/cnlohr/ch32v003fun
+// ===================================================================================
+#ifdef __cplusplus
+// This is required to allow pure virtual functions to be defined.
+extern void __cxa_pure_virtual() { while (1); }
+
+// These magic symbols are provided by the linker.
+extern void (*__preinit_array_start[]) (void) __attribute__((weak));
+extern void (*__preinit_array_end[]) (void) __attribute__((weak));
+extern void (*__init_array_start[]) (void) __attribute__((weak));
+extern void (*__init_array_end[]) (void) __attribute__((weak));
+
+void __libc_init_array(void) {
+  uint32_t count, i;
+
+  count = __preinit_array_end - __preinit_array_start;
+  for (i = 0; i < count; i++) __preinit_array_start[i]();
+
+  count = __init_array_end - __init_array_start;
+  for (i = 0; i < count; i++) __init_array_start[i]();
+}
+#endif
+
+// ===================================================================================
 // C version of CH32V003 Startup .s file from WCH
-// This file is public domain where possible or the following where not:
-// Copyright 2023 Charles Lohr, under the MIT-x11 or NewBSD licenses, you choose.
+// Based on CNLohr ch32v003fun: https://github.com/cnlohr/ch32v003fun
 // ===================================================================================
 int main(void) __attribute__((used));
 
-extern uint32_t * _sbss;
-extern uint32_t * _ebss;
-extern uint32_t * _data_lma;
-extern uint32_t * _data_vma;
-extern uint32_t * _edata;
+extern uint32_t _sbss;
+extern uint32_t _ebss;
+extern uint32_t _data_lma;
+extern uint32_t _data_vma;
+extern uint32_t _edata;
 
 // If you don't override a specific handler, it will just spin forever.
-void DefaultIRQHandler(void) {
-  asm volatile( "1: j 1b" );
-}
+void DefaultIRQHandler(void) { while(1); }
 
 // This makes it so that all of the interrupt handlers just alias to
 // DefaultIRQHandler unless they are individually overridden.
-void NMI_Handler(void)                  __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void HardFault_Handler( void )          __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void SysTick_Handler( void )            __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void SW_Handler( void )                 __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void WWDG_IRQHandler( void )            __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void PVD_IRQHandler( void )             __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void FLASH_IRQHandler( void )           __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void RCC_IRQHandler( void )             __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void EXTI7_0_IRQHandler( void )         __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void AWU_IRQHandler( void )             __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void DMA1_Channel1_IRQHandler( void )   __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void DMA1_Channel2_IRQHandler( void )   __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void DMA1_Channel3_IRQHandler( void )   __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void DMA1_Channel4_IRQHandler( void )   __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void DMA1_Channel5_IRQHandler( void )   __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void DMA1_Channel6_IRQHandler( void )   __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void DMA1_Channel7_IRQHandler( void )   __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void ADC1_IRQHandler( void )            __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void I2C1_EV_IRQHandler( void )         __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void I2C1_ER_IRQHandler( void )         __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void USART1_IRQHandler( void )          __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void SPI1_IRQHandler( void )            __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void TIM1_BRK_IRQHandler( void )        __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void TIM1_UP_IRQHandler( void )         __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void TIM1_TRG_COM_IRQHandler( void )    __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void TIM1_CC_IRQHandler( void )         __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
-void TIM2_IRQHandler( void )            __attribute__((section(".text.vector_handler"))) __attribute((weak,alias("DefaultIRQHandler"))) __attribute__((used));
+#define DUMMY_HANDLER __attribute__((section(".text.vector_handler"), weak, alias("DefaultIRQHandler"), used))
+DUMMY_HANDLER void NMI_Handler(void);
+DUMMY_HANDLER void HardFault_Handler(void);
+DUMMY_HANDLER void SysTick_Handler(void);
+DUMMY_HANDLER void SW_Handler(void);
+DUMMY_HANDLER void WWDG_IRQHandler(void);
+DUMMY_HANDLER void PVD_IRQHandler(void);
+DUMMY_HANDLER void FLASH_IRQHandler(void);
+DUMMY_HANDLER void RCC_IRQHandler(void);
+DUMMY_HANDLER void EXTI7_0_IRQHandler(void);
+DUMMY_HANDLER void AWU_IRQHandler(void);
+DUMMY_HANDLER void DMA1_Channel1_IRQHandler(void);
+DUMMY_HANDLER void DMA1_Channel2_IRQHandler(void);
+DUMMY_HANDLER void DMA1_Channel3_IRQHandler(void);
+DUMMY_HANDLER void DMA1_Channel4_IRQHandler(void);
+DUMMY_HANDLER void DMA1_Channel5_IRQHandler(void);
+DUMMY_HANDLER void DMA1_Channel6_IRQHandler(void);
+DUMMY_HANDLER void DMA1_Channel7_IRQHandler(void);
+DUMMY_HANDLER void ADC1_IRQHandler(void);
+DUMMY_HANDLER void I2C1_EV_IRQHandler(void);
+DUMMY_HANDLER void I2C1_ER_IRQHandler(void);
+DUMMY_HANDLER void USART1_IRQHandler(void);
+DUMMY_HANDLER void SPI1_IRQHandler(void);
+DUMMY_HANDLER void TIM1_BRK_IRQHandler(void);
+DUMMY_HANDLER void TIM1_UP_IRQHandler(void);
+DUMMY_HANDLER void TIM1_TRG_COM_IRQHandler(void);
+DUMMY_HANDLER void TIM1_CC_IRQHandler(void);
+DUMMY_HANDLER void TIM2_IRQHandler(void);
 
-void InterruptVector(void)              __attribute__((naked)) __attribute((section(".init"))) __attribute((weak,alias("InterruptVectorDefault")));
-void InterruptVectorDefault(void)       __attribute__((naked)) __attribute((section(".init")));
+void InterruptVector(void)        __attribute__((naked, section(".init"), weak, alias("InterruptVectorDefault")));
+void InterruptVectorDefault(void) __attribute__((naked, section(".init")));
 
 void InterruptVectorDefault(void) {
 	asm volatile( "\n\
@@ -266,88 +291,49 @@ void InterruptVectorDefault(void) {
 }
 
 void handle_reset(void) {
-	asm volatile( "\n\
-.option push\n\
-.option norelax\n\
-	la gp, __global_pointer$\n\
-.option pop\n\
-	la sp, _eusrstack\n"
-#if __GNUC__ > 10
-".option arch, +zicsr\n"
-#endif
-	// Setup the interrupt vector, processor status and INTSYSCR.
-"	li a0, 0x80\n\
-	csrw mstatus, a0\n\
-	li a3, 0x3\n\
-	csrw 0x804, a3\n\
-	la a0, InterruptVector\n\
-	or a0, a0, a3\n\
-	csrw mtvec, a0\n" 
-	: : : "a0", "a3", "memory");
+  uint32_t *src, *dst;
 
-	// Careful: Use registers to prevent overwriting of self-data.
-	// This clears out BSS.
-asm volatile(
-"	la a0, _sbss\n\
-	la a1, _ebss\n\
-	li a2, 0\n\
-	bge a0, a1, 2f\n\
-1:	sw a2, 0(a0)\n\
-	addi a0, a0, 4\n\
-	blt a0, a1, 1b\n\
-2:"
-	// This loads DATA from FLASH to RAM.
-"	la a0, _data_lma\n\
-	la a1, _data_vma\n\
-	la a2, _edata\n\
-1:	beq a1, a2, 2f\n\
-	lw a3, 0(a0)\n\
-	sw a3, 0(a1)\n\
-	addi a0, a0, 4\n\
-	addi a1, a1, 4\n\
-	bne a1, a2, 1b\n\
-2:\n"
-#ifdef CPLUSPLUS
-	// Call __libc_init_array function
-"	call %0 \n\t"
-: : "i" (__libc_init_array)
-#else
-: :
-#endif
-: "a0", "a1", "a2", "a3", "memory"
-);
+  asm volatile( "\n\
+    .option push\n\
+    .option norelax\n\
+    la gp, __global_pointer$\n\
+    .option pop\n\
+    la sp, _eusrstack\n"
+    #if __GNUC__ > 10
+"   .option arch, +zicsr\n"
+    #endif
 
+    // Setup the interrupt vector, processor status and INTSYSCR
+"   li a0, 0x80\n\
+    csrw mstatus, a0\n\
+    li a3, 0x3\n\
+    ;csrw 0x804, a3\n\
+    la a0, InterruptVector\n\
+    or a0, a0, a3\n\
+    csrw mtvec, a0\n" 
+    : : : "a0", "a3", "memory"
+  );
+
+  // Clear BSS
+  dst = &_sbss;
+  while(dst < &_ebss) *dst++ = 0;
+
+  // Copy data from FLASH to RAM
+  src = &_data_lma;
+  dst = &_data_vma;
+  while(dst < &_edata) *dst++ = *src++;
+
+  // C++ Support
+  #ifdef __cplusplus
+  __libc_init_array();
+  #endif
+
+  // Init system
   SYS_init();
 
-	// set mepc to be main as the root app.
-asm volatile(
-"	csrw mepc, %[main]\n"
-"	mret\n" : : [main]"r"(main) );
+  // Set mepc to be main as the root app
+  asm volatile(
+"   csrw mepc, %[main]\n"
+"   mret\n" : : [main]"r"(main)
+  );
 }
-
-// ===================================================================================
-// C++ Support
-// ===================================================================================
-#ifdef CPLUSPLUS
-// This is required to allow pure virtual functions to be defined.
-extern void __cxa_pure_virtual() { while (1); }
-
-// These magic symbols are provided by the linker.
-extern void (*__preinit_array_start[]) (void) __attribute__((weak));
-extern void (*__preinit_array_end[]) (void) __attribute__((weak));
-extern void (*__init_array_start[]) (void) __attribute__((weak));
-extern void (*__init_array_end[]) (void) __attribute__((weak));
-
-void __libc_init_array(void) {
-  size_t count;
-  size_t i;
-
-  count = __preinit_array_end - __preinit_array_start;
-  for (i = 0; i < count; i++)
-  __preinit_array_start[i]();
-
-  count = __init_array_end - __init_array_start;
-  for (i = 0; i < count; i++)
-  __init_array_start[i]();
-}
-#endif

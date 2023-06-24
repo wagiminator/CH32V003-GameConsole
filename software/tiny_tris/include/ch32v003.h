@@ -1,5 +1,5 @@
 // ===================================================================================
-// Header file for CH32V003                                                   * v1.1 *
+// Header file for CH32V003                                                   * v1.2 *
 // ===================================================================================
 // This contains a copy of ch32v00x.h and core_riscv.h and other misc functions.
 // NOTE: This file includes modifications by CNLohr.
@@ -399,7 +399,18 @@ typedef struct
     __IO uint32_t STATR;
 } WWDG_TypeDef;
 
-/* Enhanced Registers */
+/* Electronic Signature */
+typedef struct
+{
+    __IO uint16_t ESIG_FLACAP;
+    uint16_t      RESERVED1;
+    uint32_t      RESERVED2;
+    __IO uint32_t ESIG_UNIID1;
+    __IO uint32_t ESIG_UNIID2;
+    __IO uint32_t ESIG_UNIID3;
+} ESIG_TypeDef;
+
+/* Extended Configuration */
 typedef struct
 {
     __IO uint32_t EXTEN_CTR;
@@ -442,6 +453,7 @@ typedef struct
 
 #define FLASH_R_BASE                            (AHBPERIPH_BASE + 0x2000) /* Flash registers base address */
 #define OB_BASE                                 ((uint32_t)0x1FFFF800)    /* Flash Option Bytes base address */
+#define ESIG_BASE                               ((uint32_t)0x1FFFF7E0)
 #define EXTEN_BASE                              ((uint32_t)0x40023800)
 
 /* Peripheral declaration */
@@ -470,6 +482,7 @@ typedef struct
 #define RCC                                     ((RCC_TypeDef *)RCC_BASE)
 #define FLASH                                   ((FLASH_TypeDef *)FLASH_R_BASE)
 #define OB                                      ((OB_TypeDef *)OB_BASE)
+#define ESIG                                    ((ESIG_TypeDef *)ESIG_BASE)
 #define EXTEN                                   ((EXTEN_TypeDef *)EXTEN_BASE)
 
 #define PFIC                                    ((PFIC_TypeDef *) 0xE000E000)
@@ -1233,10 +1246,11 @@ typedef struct
 #define FLASH_CTLR_OPTWRE                       ((uint16_t)0x0200)     /* Option Bytes Write Enable */
 #define FLASH_CTLR_ERRIE                        ((uint16_t)0x0400)     /* Error Interrupt Enable */
 #define FLASH_CTLR_EOPIE                        ((uint16_t)0x1000)     /* End of operation interrupt enable */
-#define FLASH_CTLR_PAGE_PG                      ((uint16_t)0x00010000) /* Page Programming 64Byte */
-#define FLASH_CTLR_PAGE_ER                      ((uint16_t)0x00020000) /* Page Erase 64Byte */
-#define FLASH_CTLR_BUF_LOAD                     ((uint16_t)0x00040000) /* Buffer Load */
-#define FLASH_CTLR_BUF_RST                      ((uint16_t)0x00080000) /* Buffer Reset */
+#define FLASH_CTLR_FLOCK                        ((uint16_t)0x8000)     /* Fast programming lock */
+#define FLASH_CTLR_PAGE_PG                      ((uint32_t)0x00010000) /* Page Programming 64Byte */
+#define FLASH_CTLR_PAGE_ER                      ((uint32_t)0x00020000) /* Page Erase 64Byte */
+#define FLASH_CTLR_BUF_LOAD                     ((uint32_t)0x00040000) /* Buffer Load */
+#define FLASH_CTLR_BUF_RST                      ((uint32_t)0x00080000) /* Buffer Reset */
 
 /*******************  Bit definition for FLASH_ADDR register  *******************/
 #define FLASH_ADDR_FAR                          ((uint32_t)0xFFFFFFFF) /* Flash Address */
@@ -2500,10 +2514,10 @@ typedef struct
 #define WWDG_STATR_EWIF                         ((uint8_t)0x01) /* Early Wakeup Interrupt Flag */
 
 /******************************************************************************/
-/*                          ENHANCED FUNNCTION                                */
+/*                          EXTENDED CONFIGURATION                            */
 /******************************************************************************/
 
-/****************************  Enhanced register  *****************************/
+/*************************  Extended Configuration  ***************************/
 #define EXTEN_LOCKUP_EN                         ((uint32_t)0x00000040) /* Bit 6 */
 #define EXTEN_LOCKUP_RSTF                       ((uint32_t)0x00000080) /* Bit 7 */
 

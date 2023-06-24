@@ -1,5 +1,5 @@
 // ===================================================================================
-// Basic System Functions for CH32V003                                        * v1.1 *
+// Basic System Functions for CH32V003                                        * v1.2 *
 // ===================================================================================
 //
 // This file must be included!!! The system configuration and the system clock are 
@@ -11,6 +11,16 @@
 // CLK_init_HSI_PLL()     // init internal oscillator with PLL as system clock source
 // CLK_init_HSE()         // init external crystal (non PLL) as system clock source
 // CLK_init_HSE_PLL()     // init external crystal (PLL) as system clock source
+//
+// HSI_enable()           // enable internal 8MHz high-speed clock (HSI)
+// HSI_disable()          // disable HSI
+// HSI_ready()            // check if HSI is stable
+//
+// HSE_enable()           // enable external high-speed clock (HSE)
+// HSE_disable()          // disable HSE
+// HSE_ready()            // check if HSE is stable
+// HSE_bypass_on()        // enable HSE clock bypass
+// HSE_bypass_off()       // disable HSE clock bypass
 //
 // LSI_enable()           // enable internal 128kHz low-speed clock (LSI)
 // LSI_disable()          // disable LSI
@@ -50,6 +60,8 @@
 // -----------
 // - CNLohr ch32v003fun: https://github.com/cnlohr/ch32v003fun
 // - WCH Nanjing Qinheng Microelectronics: http://wch.cn
+//
+// 2023 by Stefan Wagner:   https://github.com/wagiminator
 
 #pragma once
 
@@ -60,7 +72,7 @@ extern "C" {
 #include "ch32v003.h"
 
 // ===================================================================================
-// System options (set "1" to activate)
+// System Options (set "1" to activate)
 // ===================================================================================
 #define SYS_CLK_INIT      1         // 1: init system clock on startup
 #define SYS_TICK_INIT     1         // 1: init and start SYSTICK on startup
@@ -68,7 +80,7 @@ extern "C" {
 #define SYS_USE_HSE       0         // 1: use external crystal
 
 // ===================================================================================
-// Sytem clock defines
+// Sytem Clock Defines
 // ===================================================================================
 // Set system clock frequency
 #ifndef F_CPU
@@ -113,12 +125,24 @@ extern "C" {
 #endif
 
 // ===================================================================================
-// Clock functions
+// System Clock Functions
 // ===================================================================================
 void CLK_init_HSI(void);      // init internal oscillator (non PLL) as system clock source
 void CLK_init_HSI_PLL(void);  // init internal oscillator with PLL as system clock source
 void CLK_init_HSE(void);      // init external crystal (non PLL) as system clock source
 void CLK_init_HSE_PLL(void);  // init external crystal (PLL) as system clock source
+
+// Internal 8MHz high-speed clock (HSI) functions
+#define HSI_enable()      RCC->CTLR |= RCC_HSION        // enable HSI
+#define HSI_disable()     RCC->CTLR &= ~RCC_HSION       // disable HSI
+#define HSI_ready()       (RCC->CTLR & RCC_HSIRDY)      // check if HSI is stable
+
+// External high-speed clock (HSE) functions
+#define HSE_enable()      RCC->CTLR |= RCC_HSEON        // enable HSE
+#define HSE_disable()     RCC->CTLR &= ~RCC_HSEON       // disable HSE
+#define HSE_ready()       (RCC->CTLR & RCC_HSERDY)      // check if HSE is stable
+#define HSE_bypass_on()   RCC->CTLR |= RCC_HSEBYP       // enable HSE clock bypass
+#define HSE_bypass_off()  RCC->CTLR &= ~RCC_HSEBYP      // disable HSE clock bypass
 
 // Internal 128kHz low-speed clock (LSI) functions
 #define LSI_enable()      RCC->RSTSCKR |= RCC_LSION     // enable LSI
@@ -134,7 +158,7 @@ void CLK_init_HSE_PLL(void);  // init external crystal (PLL) as system clock sou
 void MCO_init(void);                                    // init clock output to pin PC4
 
 // ===================================================================================
-// Delay functions
+// Delay Functions
 // ===================================================================================
 #define STK_init()        STK->CTLR = STK_CTLR_STE | STK_CTLR_STCLK // init SYSTICK @ F_CPU
 #define DLY_US_TIME       (F_CPU / 1000000)             // system ticks per us
@@ -144,26 +168,26 @@ void MCO_init(void);                                    // init clock output to 
 void DLY_ticks(uint32_t n);                             // delay n system ticks
 
 // ===================================================================================
-// Reset functions
+// Reset Functions
 // ===================================================================================
 #define RST_now()         PFIC->CFGR    = PFIC_RESETSYS | PFIC_KEY3
-#define RST_clearFlags()  RCC->RSTSCKR |= RCC_PINRSTF
+#define RST_clearFlags()  RCC->RSTSCKR |= RCC_RMVF
 #define RST_wasLowPower() (RCC->RSTSCKR & RCC_LPWRRSTF)
 #define RST_wasWWDG()     (RCC->RSTSCKR & RCC_WWDGRSTF)
 #define RST_wasIWDG()     (RCC->RSTSCKR & RCC_IWDGRSTF)
 #define RST_wasSoftware() (RCC->RSTSCKR & RCC_SFTRSTF)
 #define RST_wasPower()    (RCC->RSTSCKR & RCC_PORRSTF)
-#define RST_wasPin()      (RCC->RSTSCKR & RCC_PORRSTF)
+#define RST_wasPin()      (RCC->RSTSCKR & RCC_PINRSTF)
 
 // ===================================================================================
-// Independent watchdog timer (IWDG) functions
+// Independent Watchdog Timer (IWDG) Functions
 // ===================================================================================
 void IWDG_start(uint16_t ms);                           // start IWDG with time in ms
 void IWDG_reload(uint16_t ms);                          // reload IWDG with time in ms
 #define IWDG_feed()       IWDG->CTLR = 0xAAAA           // feed the dog (reload time)
 
 // ===================================================================================
-// Sleep functions
+// Sleep Functions
 // ===================================================================================
 void SLEEP_WFI_now(void);   // put device into sleep, wake up by interrupt
 void SLEEP_WFE_now(void);   // put device into sleep, wake up by event
@@ -184,13 +208,13 @@ void STDBY_WFE_now(void);   // put device into standby (deep sleep), wake up eve
 void AWU_init(void);       // init automatic wake-up timer
 
 // ===================================================================================
-// Reset and interrupt handler
+// Reset and Interrupt Handler
 // ===================================================================================
-void handle_reset(void)        __attribute__((naked)) __attribute((section(".text.handle_reset"))) __attribute__((used));
-void DefaultIRQHandler(void)   __attribute__((section(".text.vector_handler"))) __attribute__((naked)) __attribute__((used));
+void handle_reset(void)       __attribute__((section(".text.handle_reset"), naked, used));
+void DefaultIRQHandler(void)  __attribute__((section(".text.vector_handler"), naked, used));
 
 // ===================================================================================
-// Imported system functions
+// Imported Ssystem Functions
 // ===================================================================================
 // Enable Global Interrupt
 static inline void __enable_irq(void) {
