@@ -1,8 +1,8 @@
-# CH32V003 + WCH-LinkE Programming Tools
+# WCH-LinkE Programming Tools
 ## WCH-LinkE
 To program the CH32V003 microcontroller, you will need a special programming device which utilizes the proprietary single-wire serial debug interface (SDI). The [WCH-LinkE](http://www.wch-ic.com/products/WCH-Link.html) (pay attention to the "E" in the name) is a suitable device for this purpose and can be purchased commercially for around $3. This debugging tool is not only compatible with the CH32V003 but also with other WCH RISC-V and ARM-based microcontrollers.
 
-To use the WCH-LinkE on Linux, you need to grant access permissions beforehand by executing the following commands:
+To use the WCH-Link on Linux, you need to grant access permissions beforehand by executing the following commands:
 ```
 echo 'SUBSYSTEM=="usb", ATTR{idVendor}=="1a86", ATTR{idProduct}=="8010", MODE="666"' | sudo tee /etc/udev/rules.d/99-WCH-LinkE.rules
 echo 'SUBSYSTEM=="usb", ATTR{idVendor}=="1a86", ATTR{idProduct}=="8012", MODE="666"' | sudo tee -a /etc/udev/rules.d/99-WCH-LinkE.rules
@@ -72,16 +72,18 @@ python3 -m pip install pyusb
 ```
 
 ```
-Usage: rvprog.py [-h] [-a] [-v] [-u] [-e] [-p] [-P] [-f FLASH]
+Usage: rvprog.py [-h] [-a] [-v] [-b] [-u] [-l] [-e] [-G] [-R] [-f FLASH]
 
 Optional arguments:
   -h, --help                show help message and exit
-  -a, --armmode             switch WCH-LinkE to ARM mode
-  -v, --rvmode              switch WCH-LinkE to RISC-V mode
-  -u, --unlock              unlock (unbrick) chip
+  -a, --armmode             switch WCH-Link to ARM mode
+  -v, --rvmode              switch WCH-Link to RISC-V mode
+  -b, --unbrick             unbrick chip
+  -u, --unlock              unlock chip (remove read protection)
+  -l, --lock                lock chip (set read protection)
   -e, --erase               perform a whole chip erase
-  -p, --pingpio             make nRST pin a GPIO pin
-  -P, --pinreset            make nRST pin a reset pin
+  -G, --pingpio             make nRST pin a GPIO pin
+  -R, --pinreset            make nRST pin a reset pin
   -f FLASH, --flash FLASH   write BIN file to flash
 
 Example:
