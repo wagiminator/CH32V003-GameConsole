@@ -84,7 +84,7 @@ def _main():
     try:
         if args.rvmode:
             print('Searching for WCH-Link in ARM mode ...')
-            armlink = usb.core.find(idVendor = CH_VENDOR_ID, idProduct = 0x8012)
+            armlink = usb.core.find(idVendor = CH_VENDOR_ID, idProduct = CH_ARM_ID)
             if armlink is None:
                 raise Exception('No WCH-Link in ARM mode found!')
             print('SUCCESS: Found WCH-Link in ARM mode.')
@@ -223,7 +223,7 @@ class Programmer:
             self.chipseries =  reply[4]<<4
             self.chiptype   = (reply[4]<<4) + (reply[5]>>4)
             self.chipname   = 'CH32V%03x' % self.chiptype
-            if (self.chiptype == 0xfff):
+            if self.chipseries not in (0x000, 0x200, 0x300):
                 time.sleep(0.2)
                 continue
             success = 1
@@ -245,11 +245,10 @@ class Programmer:
 
     # Clear USB receive buffers
     def clearreply(self):
-        try:
-            self.dev.read(CH_EP_IN, CH_PACKET_SIZE, 1)
-            self.dev.read(CH_EP_IN_RAW, CH_PACKET_SIZE, 1)
-        except:
-            None
+        try:    self.dev.read(CH_EP_IN, CH_PACKET_SIZE, 1)
+        except: None
+        try:    self.dev.read(CH_EP_IN_RAW, CH_PACKET_SIZE, 1)
+        except: None
 
     # Write to MCU register
     def writereg(self, addr, data):
@@ -334,9 +333,8 @@ class Programmer:
     def page_data(self, data, pagesize):
         if (len(data) % pagesize) > 0:
             data += b'\xff' * (pagesize - (len(data) % pagesize))
-        total_length = len(data)
         result = list()
-        while len(result) < total_length / pagesize:
+        while len(data):
             result.append(data[:pagesize])
             data = data[pagesize:]
         return result
@@ -395,12 +393,13 @@ class Programmer:
             self.writebinaryblob203(CH_CODE_BASE, data)
 
 # ===================================================================================
-# Debug Protocol Constants
+# Device Constants
 # ===================================================================================
 
 # USB device settings
 CH_VENDOR_ID    = 0x1A86    # VID
-CH_PRODUCT_ID   = 0x8010    # PID
+CH_PRODUCT_ID   = 0x8010    # PID in RISC-V mode
+CH_ARM_ID       = 0x8012    # PID in ARM mode
 CH_PACKET_SIZE  = 1024      # packet size
 CH_INTERFACE    = 0         # interface number
 CH_EP_OUT       = 0x01      # endpoint for command transfer out
@@ -412,7 +411,7 @@ CH_TIMEOUT      = 5000      # timeout for USB operations
 # Memory constants
 CH_RAM_BASE     = 0x20000000
 CH_CODE_BASE    = 0x08000000
-CB_BOOT_BASE    = 0x1FFFF000
+CH_BOOT_BASE    = 0x1FFFF000
 
 # ===================================================================================
 # Flash Bootloader
