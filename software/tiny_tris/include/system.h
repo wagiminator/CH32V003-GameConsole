@@ -208,13 +208,7 @@ void STDBY_WFE_now(void);   // put device into standby (deep sleep), wake up eve
 void AWU_init(void);       // init automatic wake-up timer
 
 // ===================================================================================
-// Reset and Interrupt Handler
-// ===================================================================================
-void handle_reset(void)       __attribute__((section(".text.handle_reset"), naked, used));
-void DefaultIRQHandler(void)  __attribute__((section(".text.vector_handler"), naked, used));
-
-// ===================================================================================
-// Imported Ssystem Functions
+// Imported System Functions
 // ===================================================================================
 // Enable Global Interrupt
 static inline void __enable_irq(void) {
@@ -296,14 +290,13 @@ __attribute__( ( always_inline ) ) static inline void __WFE(void) {
 // Set VTF Interrupt
 static inline void SetVTFIRQ(uint32_t addr, IRQn_Type IRQn, uint8_t num, FunctionalState NewState) {
   if(num > 1)  return;
-  if (NewState != DISABLE)
-  {
-      NVIC->VTFIDR[num] = IRQn;
-      NVIC->VTFADDR[num] = ((addr&0xFFFFFFFE)|0x1);
+  if(NewState != DISABLE) {
+    NVIC->VTFIDR[num] = IRQn;
+    NVIC->VTFADDR[num] = ((addr&0xFFFFFFFE)|0x1);
   }
-  else{
-      NVIC->VTFIDR[num] = IRQn;
-      NVIC->VTFADDR[num] = ((addr&0xFFFFFFFE)&(~0x1));
+  else {
+    NVIC->VTFIDR[num] = IRQn;
+    NVIC->VTFADDR[num] = ((addr&0xFFFFFFFE)&(~0x1));
   }
 }
 

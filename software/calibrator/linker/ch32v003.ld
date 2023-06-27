@@ -1,4 +1,4 @@
-ENTRY( InterruptVector )
+ENTRY( jump_reset )
 
 MEMORY
 {
@@ -12,7 +12,8 @@ SECTIONS
     { 
       _sinit = .;
       . = ALIGN(4);
-      KEEP(*(SORT_NONE(.init)))
+      KEEP(*(SORT_NONE(.initjump)))
+      KEEP(*(SORT_NONE(.vectors)))
       . = ALIGN(4);
       _einit = .;
     } >FLASH AT>FLASH
@@ -138,10 +139,6 @@ SECTIONS
     } >RAM AT>FLASH
 
     PROVIDE( _end = _ebss);
-	PROVIDE( end = . );
-
-	PROVIDE( _eusrstack = ORIGIN(RAM) + LENGTH(RAM));	
+    PROVIDE( end = . );
+    PROVIDE( _eusrstack = ORIGIN(RAM) + LENGTH(RAM));	
 }
-
-
-

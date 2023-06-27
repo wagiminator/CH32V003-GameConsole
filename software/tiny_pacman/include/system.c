@@ -184,10 +184,8 @@ extern void (*__init_array_end[]) (void) __attribute__((weak));
 
 void __libc_init_array(void) {
   uint32_t count, i;
-
   count = __preinit_array_end - __preinit_array_start;
   for (i = 0; i < count; i++) __preinit_array_start[i]();
-
   count = __init_array_end - __init_array_start;
   for (i = 0; i < count; i++) __init_array_start[i]();
 }
@@ -197,20 +195,21 @@ void __libc_init_array(void) {
 // C version of CH32V003 Startup .s file from WCH
 // Based on CNLohr ch32v003fun: https://github.com/cnlohr/ch32v003fun
 // ===================================================================================
-int main(void) __attribute__((used));
-
 extern uint32_t _sbss;
 extern uint32_t _ebss;
 extern uint32_t _data_lma;
 extern uint32_t _data_vma;
 extern uint32_t _edata;
 
-// If you don't override a specific handler, it will just spin forever.
-void DefaultIRQHandler(void) { while(1); }
+// Prototypes
+int main(void)                          __attribute__((used));
+void jump_reset(void)                   __attribute__((section(".initjump"), naked, used));
+void (*const interrupt_vectors[])(void) __attribute__((section(".vectors"), used));
+void default_handler(void)              __attribute__((section(".text.vector_handler"), naked, used));
+void handle_reset(void)                 __attribute__((section(".text.handle_reset"), naked, used));
 
-// This makes it so that all of the interrupt handlers just alias to
-// DefaultIRQHandler unless they are individually overridden.
-#define DUMMY_HANDLER __attribute__((section(".text.vector_handler"), weak, alias("DefaultIRQHandler"), used))
+// All interrupt handlers are aliased to default_handler unless overridden individually
+#define DUMMY_HANDLER __attribute__((section(".text.vector_handler"), weak, alias("default_handler"), used))
 DUMMY_HANDLER void NMI_Handler(void);
 DUMMY_HANDLER void HardFault_Handler(void);
 DUMMY_HANDLER void SysTick_Handler(void);
@@ -239,60 +238,62 @@ DUMMY_HANDLER void TIM1_TRG_COM_IRQHandler(void);
 DUMMY_HANDLER void TIM1_CC_IRQHandler(void);
 DUMMY_HANDLER void TIM2_IRQHandler(void);
 
-void InterruptVector(void)        __attribute__((naked, section(".init"), weak, alias("InterruptVectorDefault")));
-void InterruptVectorDefault(void) __attribute__((naked, section(".init")));
+// FLASH starts with a jump to the reset handler
+void jump_reset(void) { asm volatile("j handle_reset"); }
 
-void InterruptVectorDefault(void) {
-	asm volatile( "\n\
-	.align  2\n\
-	.option   push;\n\
-	.option   norvc;\n\
-	j handle_reset\n\
-	.word   0\n\
-	.word   NMI_Handler               /* NMI Handler */                    \n\
-	.word   HardFault_Handler         /* Hard Fault Handler */             \n\
-	.word   0\n\
-	.word   0\n\
-	.word   0\n\
-	.word   0\n\
-	.word   0\n\
-	.word   0\n\
-	.word   0\n\
-	.word   0\n\
-	.word   SysTick_Handler           /* SysTick Handler */                \n\
-	.word   0\n\
-	.word   SW_Handler                /* SW Handler */                     \n\
-	.word   0\n\
-	/* External Interrupts */                                              \n\
-	.word   WWDG_IRQHandler           /* Window Watchdog */                \n\
-	.word   PVD_IRQHandler            /* PVD through EXTI Line detect */   \n\
-	.word   FLASH_IRQHandler          /* Flash */                          \n\
-	.word   RCC_IRQHandler            /* RCC */                            \n\
-	.word   EXTI7_0_IRQHandler        /* EXTI Line 7..0 */                 \n\
-	.word   AWU_IRQHandler            /* AWU */                            \n\
-	.word   DMA1_Channel1_IRQHandler  /* DMA1 Channel 1 */                 \n\
-	.word   DMA1_Channel2_IRQHandler  /* DMA1 Channel 2 */                 \n\
-	.word   DMA1_Channel3_IRQHandler  /* DMA1 Channel 3 */                 \n\
-	.word   DMA1_Channel4_IRQHandler  /* DMA1 Channel 4 */                 \n\
-	.word   DMA1_Channel5_IRQHandler  /* DMA1 Channel 5 */                 \n\
-	.word   DMA1_Channel6_IRQHandler  /* DMA1 Channel 6 */                 \n\
-	.word   DMA1_Channel7_IRQHandler  /* DMA1 Channel 7 */                 \n\
-	.word   ADC1_IRQHandler           /* ADC1 */                           \n\
-	.word   I2C1_EV_IRQHandler        /* I2C1 Event */                     \n\
-	.word   I2C1_ER_IRQHandler        /* I2C1 Error */                     \n\
-	.word   USART1_IRQHandler         /* USART1 */                         \n\
-	.word   SPI1_IRQHandler           /* SPI1 */                           \n\
-	.word   TIM1_BRK_IRQHandler       /* TIM1 Break */                     \n\
-	.word   TIM1_UP_IRQHandler        /* TIM1 Update */                    \n\
-	.word   TIM1_TRG_COM_IRQHandler   /* TIM1 Trigger and Commutation */   \n\
-	.word   TIM1_CC_IRQHandler        /* TIM1 Capture Compare */           \n\
-	.word   TIM2_IRQHandler           /* TIM2 */                           \n\
-	.option   pop;\n");
-}
+// Afterwards there comes the interrupt vector table
+void (* const interrupt_vectors[])(void) = {
+  // RISC-V handlers
+  0,                                //  1 - Reserved
+  NMI_Handler,                      //  2 - NMI Handler
+  HardFault_Handler,                //  3 - Hard Fault Handler
+  0,                                //  4 - Reserved
+  0,                                //  5 - Reserved
+  0,                                //  6 - Reserved
+  0,                                //  7 - Reserved
+  0,                                //  8 - Reserved
+  0,                                //  9 - Reserved
+  0,                                // 10 - Reserved
+  0,                                // 11 - Reserved
+  SysTick_Handler,                  // 12 - SysTick Handler
+  0,                                // 13 - Reserved
+  SW_Handler,                       // 14 - SW Handler
+  0,                                // 15 - Reserved
+  
+  // Peripheral handlers
+  WWDG_IRQHandler,                  //  0 - Window Watchdog
+  PVD_IRQHandler,                   //  1 - PVD through EXTI Line detect
+  FLASH_IRQHandler,                 //  2 - Flash
+  RCC_IRQHandler,                   //  3 - RCC
+  EXTI7_0_IRQHandler,               //  4 - EXTI Line 7..0
+  AWU_IRQHandler,                   //  5 - AWU
+  DMA1_Channel1_IRQHandler,         //  6 - DMA1 Channel 1
+  DMA1_Channel2_IRQHandler,         //  7 - DMA1 Channel 2
+  DMA1_Channel3_IRQHandler,         //  8 - DMA1 Channel 3
+  DMA1_Channel4_IRQHandler,         //  9 - DMA1 Channel 4
+  DMA1_Channel5_IRQHandler,         // 10 - DMA1 Channel 5
+  DMA1_Channel6_IRQHandler,         // 11 - DMA1 Channel 6
+  DMA1_Channel7_IRQHandler,         // 12 - DMA1 Channel 7
+  ADC1_IRQHandler,                  // 13 - ADC1
+  I2C1_EV_IRQHandler,               // 14 - I2C1 Event
+  I2C1_ER_IRQHandler,               // 15 - I2C1 Error
+  USART1_IRQHandler,                // 16 - USART1
+  SPI1_IRQHandler,                  // 17 - SPI1
+  TIM1_BRK_IRQHandler,              // 18 - TIM1 Break
+  TIM1_UP_IRQHandler,               // 19 - TIM1 Update
+  TIM1_TRG_COM_IRQHandler,          // 20 - TIM1 Trigger and Commutation
+  TIM1_CC_IRQHandler,               // 21 - TIM1 Capture Compare
+  TIM2_IRQHandler,                  // 22 - TIM2
+};
 
+// Unless a specific handler is overridden, it just spins forever
+void default_handler(void) { while(1); }
+
+// Reset handler
 void handle_reset(void) {
   uint32_t *src, *dst;
 
+  // Set global pointer and stack pointer
   asm volatile( "\n\
     .option push\n\
     .option norelax\n\
@@ -308,20 +309,20 @@ void handle_reset(void) {
     csrw mstatus, a0\n\
     li a3, 0x3\n\
     ;csrw 0x804, a3\n\
-    la a0, InterruptVector\n\
+    la a0, jump_reset\n\
     or a0, a0, a3\n\
     csrw mtvec, a0\n" 
     : : : "a0", "a3", "memory"
   );
 
-  // Clear BSS
-  dst = &_sbss;
-  while(dst < &_ebss) *dst++ = 0;
-
   // Copy data from FLASH to RAM
   src = &_data_lma;
   dst = &_data_vma;
   while(dst < &_edata) *dst++ = *src++;
+
+  // Clear uninitialized variables
+  dst = &_sbss;
+  while(dst < &_ebss) *dst++ = 0;
 
   // C++ Support
   #ifdef __cplusplus
