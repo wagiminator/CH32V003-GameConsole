@@ -202,11 +202,11 @@ extern uint32_t _data_vma;
 extern uint32_t _edata;
 
 // Prototypes
-int main(void)                          __attribute__((used));
-void jump_reset(void)                   __attribute__((section(".initjump"), naked, used));
-void (*const interrupt_vectors[])(void) __attribute__((section(".vectors"), used));
+int main(void)                          __attribute__((section(".text.main"), used));
+void jump_reset(void)                   __attribute__((section(".init.jump"), naked, used));
+void (*const interrupt_vectors[])(void) __attribute__((section(".init.vectors"), used));
 void default_handler(void)              __attribute__((section(".text.vector_handler"), naked, used));
-void handle_reset(void)                 __attribute__((section(".text.handle_reset"), naked, used));
+void reset_handler(void)                __attribute__((section(".text.reset_handler"), naked, used));
 
 // All interrupt handlers are aliased to default_handler unless overridden individually
 #define DUMMY_HANDLER __attribute__((section(".text.vector_handler"), weak, alias("default_handler"), used))
@@ -239,7 +239,7 @@ DUMMY_HANDLER void TIM1_CC_IRQHandler(void);
 DUMMY_HANDLER void TIM2_IRQHandler(void);
 
 // FLASH starts with a jump to the reset handler
-void jump_reset(void) { asm volatile("j handle_reset"); }
+void jump_reset(void) { asm volatile("j reset_handler"); }
 
 // Afterwards there comes the interrupt vector table
 void (* const interrupt_vectors[])(void) = {
@@ -261,36 +261,36 @@ void (* const interrupt_vectors[])(void) = {
   0,                                // 15 - Reserved
   
   // Peripheral handlers
-  WWDG_IRQHandler,                  //  0 - Window Watchdog
-  PVD_IRQHandler,                   //  1 - PVD through EXTI Line detect
-  FLASH_IRQHandler,                 //  2 - Flash
-  RCC_IRQHandler,                   //  3 - RCC
-  EXTI7_0_IRQHandler,               //  4 - EXTI Line 7..0
-  AWU_IRQHandler,                   //  5 - AWU
-  DMA1_Channel1_IRQHandler,         //  6 - DMA1 Channel 1
-  DMA1_Channel2_IRQHandler,         //  7 - DMA1 Channel 2
-  DMA1_Channel3_IRQHandler,         //  8 - DMA1 Channel 3
-  DMA1_Channel4_IRQHandler,         //  9 - DMA1 Channel 4
-  DMA1_Channel5_IRQHandler,         // 10 - DMA1 Channel 5
-  DMA1_Channel6_IRQHandler,         // 11 - DMA1 Channel 6
-  DMA1_Channel7_IRQHandler,         // 12 - DMA1 Channel 7
-  ADC1_IRQHandler,                  // 13 - ADC1
-  I2C1_EV_IRQHandler,               // 14 - I2C1 Event
-  I2C1_ER_IRQHandler,               // 15 - I2C1 Error
-  USART1_IRQHandler,                // 16 - USART1
-  SPI1_IRQHandler,                  // 17 - SPI1
-  TIM1_BRK_IRQHandler,              // 18 - TIM1 Break
-  TIM1_UP_IRQHandler,               // 19 - TIM1 Update
-  TIM1_TRG_COM_IRQHandler,          // 20 - TIM1 Trigger and Commutation
-  TIM1_CC_IRQHandler,               // 21 - TIM1 Capture Compare
-  TIM2_IRQHandler,                  // 22 - TIM2
+  WWDG_IRQHandler,                  // 16 - Window Watchdog
+  PVD_IRQHandler,                   // 17 - PVD through EXTI Line detect
+  FLASH_IRQHandler,                 // 18 - Flash
+  RCC_IRQHandler,                   // 19 - RCC
+  EXTI7_0_IRQHandler,               // 20 - EXTI Line 7..0
+  AWU_IRQHandler,                   // 21 - AWU
+  DMA1_Channel1_IRQHandler,         // 22 - DMA1 Channel 1
+  DMA1_Channel2_IRQHandler,         // 23 - DMA1 Channel 2
+  DMA1_Channel3_IRQHandler,         // 24 - DMA1 Channel 3
+  DMA1_Channel4_IRQHandler,         // 25 - DMA1 Channel 4
+  DMA1_Channel5_IRQHandler,         // 26 - DMA1 Channel 5
+  DMA1_Channel6_IRQHandler,         // 27 - DMA1 Channel 6
+  DMA1_Channel7_IRQHandler,         // 28 - DMA1 Channel 7
+  ADC1_IRQHandler,                  // 29 - ADC1
+  I2C1_EV_IRQHandler,               // 30 - I2C1 Event
+  I2C1_ER_IRQHandler,               // 31 - I2C1 Error
+  USART1_IRQHandler,                // 32 - USART1
+  SPI1_IRQHandler,                  // 33 - SPI1
+  TIM1_BRK_IRQHandler,              // 34 - TIM1 Break
+  TIM1_UP_IRQHandler,               // 35 - TIM1 Update
+  TIM1_TRG_COM_IRQHandler,          // 36 - TIM1 Trigger and Commutation
+  TIM1_CC_IRQHandler,               // 37 - TIM1 Capture Compare
+  TIM2_IRQHandler,                  // 38 - TIM2
 };
 
 // Unless a specific handler is overridden, it just spins forever
 void default_handler(void) { while(1); }
 
 // Reset handler
-void handle_reset(void) {
+void reset_handler(void) {
   uint32_t *src, *dst;
 
   // Set global pointer and stack pointer

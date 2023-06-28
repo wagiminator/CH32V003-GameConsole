@@ -59,11 +59,14 @@ except:
     sys.exit(1)
 
 # Check if switching was successful
-time.sleep(2)
-rvlink = usb.core.find(idVendor = CH_VENDOR_ID, idProduct = CH_PRODUCT_ID)
-if rvlink is None:
-    print('ERROR: Switching to RISC-V mode unsuccessful!')
-    sys.exit(1)
+counter = 30
+while counter:
+    time.sleep(0.1)
+    counter -= 1
+    rvlink = usb.core.find(idVendor = CH_VENDOR_ID, idProduct = CH_PRODUCT_ID)
+    if rvlink is not None:
+        print('SUCCESS: WCH-Link is now in RISC-V mode.')
+        sys.exit(0)
 
-print('SUCCESS: WCH-Link is now in RISC-V mode.')
-sys.exit(0)
+print('ERROR: Switching to RISC-V mode unsuccessful!')
+sys.exit(1)
