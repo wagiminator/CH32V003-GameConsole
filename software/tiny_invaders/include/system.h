@@ -1,5 +1,5 @@
 // ===================================================================================
-// Basic System Functions for CH32V003                                        * v1.2 *
+// Basic System Functions for CH32V003                                        * v1.3 *
 // ===================================================================================
 //
 // This file must be included!!! The system configuration and the system clock are 
@@ -100,8 +100,22 @@ extern "C" {
   #define CLK_DIV         RCC_HPRE_DIV2
 #elif F_CPU ==  8000000
   #define CLK_DIV         RCC_HPRE_DIV3
+#elif F_CPU ==  6000000
+  #define CLK_DIV         RCC_HPRE_DIV4
 #elif F_CPU ==  4000000
   #define CLK_DIV         RCC_HPRE_DIV6
+#elif F_CPU ==  3000000
+  #define CLK_DIV         RCC_HPRE_DIV8
+#elif F_CPU ==  1500000
+  #define CLK_DIV         RCC_HPRE_DIV16
+#elif F_CPU ==   750000
+  #define CLK_DIV         RCC_HPRE_DIV32
+#elif F_CPU ==   375000
+  #define CLK_DIV         RCC_HPRE_DIV64
+#elif F_CPU ==   187500
+  #define CLK_DIV         RCC_HPRE_DIV128
+#elif F_CPU ==    93750
+  #define CLK_DIV         RCC_HPRE_DIV256
 #else
   #warning Unsupported system clock frequency, using internal 48MHz
   #define CLK_DIV         RCC_HPRE_DIV1
@@ -150,10 +164,10 @@ void CLK_init_HSE_PLL(void);  // init external crystal (PLL) as system clock sou
 #define LSI_ready()       (RCC->RSTSCKR & RCC_LSIRDY)   // check if LSI is stable
 
 // Clock output functions (pin PC4)
-#define MCO_setSYS()      {RCC->CFGR0 &= ~RCC_CFGR0_MCO; RCC->CFGR0 |= RCC_CFGR0_MCO_SYSCLK;}
-#define MCO_setHSI()      {RCC->CFGR0 &= ~RCC_CFGR0_MCO; RCC->CFGR0 |= RCC_CFGR0_MCO_HSI;}
-#define MCO_setHSE()      {RCC->CFGR0 &= ~RCC_CFGR0_MCO; RCC->CFGR0 |= RCC_CFGR0_MCO_HSE;}
-#define MCO_setPLL()      {RCC->CFGR0 &= ~RCC_CFGR0_MCO; RCC->CFGR0 |= RCC_CFGR0_MCO_PLL;}
+#define MCO_setSYS()      RCC->CFGR0 = (RCC->CFGR0 & ~RCC_CFGR0_MCO) | RCC_CFGR0_MCO_SYSCLK
+#define MCO_setHSI()      RCC->CFGR0 = (RCC->CFGR0 & ~RCC_CFGR0_MCO) | RCC_CFGR0_MCO_HSI
+#define MCO_setHSE()      RCC->CFGR0 = (RCC->CFGR0 & ~RCC_CFGR0_MCO) | RCC_CFGR0_MCO_HSE
+#define MCO_setPLL()      RCC->CFGR0 = (RCC->CFGR0 & ~RCC_CFGR0_MCO) | RCC_CFGR0_MCO_PLL
 #define MCO_stop()        RCC->CFGR0 &= ~RCC_CFGR0_MCO  // stop clock output to pin PC4
 void MCO_init(void);                                    // init clock output to pin PC4
 

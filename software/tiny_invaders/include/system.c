@@ -1,5 +1,5 @@
 // ===================================================================================
-// Basic System Functions for CH32V003                                        * v1.2 *
+// Basic System Functions for CH32V003                                        * v1.3 *
 // ===================================================================================
 //
 // This file must be included!!!!
@@ -51,9 +51,9 @@ void CLK_init_HSI_PLL(void) {
   RCC->INTR     = 0x009F0000;                                   // clear ready flags
   RCC->CFGR0    = CLK_DIV | RCC_PLLSRC_HSI_Mul2;                // set PLL and clock divider
   RCC->CTLR     = RCC_HSION | RCC_PLLON | ((HSITRIM) << 3);     // use HSI, but enable PLL
-  while((RCC->CTLR & RCC_PLLRDY) == 0);                                     // wait till PLL is ready
-  RCC->CFGR0 = (RCC->CFGR0 & ((uint32_t)~(RCC_SW))) | (uint32_t)RCC_SW_PLL; // select PLL as system clock source
-  while((RCC->CFGR0 & (uint32_t)RCC_SWS) != (uint32_t)0x08);                // wait till PLL is used as system clock source
+  while(!(RCC->CTLR & RCC_PLLRDY));                             // wait till PLL is ready
+  RCC->CFGR0 = (RCC->CFGR0 & ~(RCC_SW)) | RCC_SW_PLL;           // select PLL as system clock source
+  while((RCC->CFGR0 & RCC_SWS) != RCC_SWS_PLL);                 // wait till PLL is used as system clock source
 }
 
 // Init external crystal (non PLL) as system clock source
@@ -64,7 +64,7 @@ void CLK_init_HSE(void) {
   RCC->CTLR       = RCC_HSION | RCC_HSEON | RCC_PLLON;          // enable HSE and keep HSI+PLL on
   while(!(RCC->CTLR & RCC_HSERDY));                             // wait till HSE is ready
   RCC->CFGR0      = RCC_HPRE_DIV1 | RCC_SW_HSE;                 // HCLK = SYSCLK = APB1 and use HSE for system clock
-  while ((RCC->CFGR0 & (uint32_t)RCC_SWS) != (uint32_t)0x04);   // wait till HSE is used as system clock source
+  while((RCC->CFGR0 & RCC_SWS) != RCC_SWS_HSE);                 // wait till HSE is used as system clock source
   RCC->CTLR       = RCC_HSEON;                                  // turn off HSI + PLL.
 }
 
@@ -79,16 +79,15 @@ void CLK_init_HSE_PLL(void) {
   RCC->CTLR       = RCC_HSEON;                                  // turn off PLL and HSI
   RCC->CFGR0      = RCC_SW_HSE | RCC_HPRE_DIV1 | RCC_PLLSRC_HSE_Mul2; // use PLL with HSE
   RCC->CTLR       = RCC_HSEON | RCC_PLLON;                      // turn PLL back on..
-  while((RCC->CTLR & RCC_PLLRDY) == 0);                         // wait till PLL is ready
+  while(!(RCC->CTLR & RCC_PLLRDY));                             // wait till PLL is ready
   RCC->CFGR0 = RCC_SW_PLL | RCC_HPRE_DIV1 | RCC_PLLSRC_HSE_Mul2;// select PLL as system clock source
-  while ((RCC->CFGR0 & (uint32_t)RCC_SWS) != (uint32_t)0x08);   // wait till PLL is used as system clock source
+  while((RCC->CFGR0 & RCC_SWS) != RCC_SWS_PLL);                 // wait till PLL is used as system clock source
 }
 
 // Setup pin PC4 for MCO (output, push-pull, 50MHz, auxiliary)
 void MCO_init(void) {
-  RCC->APB2PCENR |=   RCC_AFIOEN | RCC_IOPCEN;
-  GPIOC->CFGLR   &= ~(0b1111<<(4<<2));
-  GPIOC->CFGLR   |=   0b1011<<(4<<2);
+  RCC->APB2PCENR |= RCC_AFIOEN | RCC_IOPCEN;
+  GPIOC->CFGLR    = (GPIOC->CFGLR & ~((uint32_t)0b1111<<(4<<2))) | ((uint32_t)0b1011<<(4<<2));
 }
 
 // ===================================================================================
@@ -98,7 +97,7 @@ void MCO_init(void) {
 // Wait n counts of SysTick
 void DLY_ticks(uint32_t n) {
   uint32_t end = STK->CNT + n;
-  while(((int32_t)(STK->CNT - end)) < 0 );
+  while(((int32_t)(STK->CNT - end)) < 0);
 }
 
 // ===================================================================================
@@ -185,9 +184,9 @@ extern void (*__init_array_end[]) (void) __attribute__((weak));
 void __libc_init_array(void) {
   uint32_t count, i;
   count = __preinit_array_end - __preinit_array_start;
-  for (i = 0; i < count; i++) __preinit_array_start[i]();
+  for(i = 0; i < count; i++) __preinit_array_start[i]();
   count = __init_array_end - __init_array_start;
-  for (i = 0; i < count; i++) __init_array_start[i]();
+  for(i = 0; i < count; i++) __init_array_start[i]();
 }
 #endif
 
@@ -202,11 +201,11 @@ extern uint32_t _data_vma;
 extern uint32_t _edata;
 
 // Prototypes
-int main(void)                          __attribute__((section(".text.main"), used));
-void jump_reset(void)                   __attribute__((section(".init.jump"), naked, used));
-void (*const interrupt_vectors[])(void) __attribute__((section(".init.vectors"), used));
-void default_handler(void)              __attribute__((section(".text.vector_handler"), naked, used));
-void reset_handler(void)                __attribute__((section(".text.reset_handler"), naked, used));
+int main(void)                __attribute__((section(".text.main"), used));
+void jump_reset(void)         __attribute__((section(".init.jump"), naked, used));
+void (*const vectors[])(void) __attribute__((section(".init.vectors"), used));
+void default_handler(void)    __attribute__((section(".text.vector_handler"), naked, used));
+void reset_handler(void)      __attribute__((section(".text.reset_handler"), naked, used));
 
 // All interrupt handlers are aliased to default_handler unless overridden individually
 #define DUMMY_HANDLER __attribute__((section(".text.vector_handler"), weak, alias("default_handler"), used))
@@ -242,7 +241,7 @@ DUMMY_HANDLER void TIM2_IRQHandler(void);
 void jump_reset(void) { asm volatile("j reset_handler"); }
 
 // Afterwards there comes the interrupt vector table
-void (* const interrupt_vectors[])(void) = {
+void (* const vectors[])(void) = {
   // RISC-V handlers
   0,                                //  1 - Reserved
   NMI_Handler,                      //  2 - NMI Handler
@@ -301,11 +300,11 @@ void reset_handler(void) {
     .option pop\n\
     la sp, _eusrstack\n"
     #if __GNUC__ > 10
-"   .option arch, +zicsr\n"
+  " .option arch, +zicsr\n"
     #endif
 
     // Setup the interrupt vector, processor status and INTSYSCR
-"   li a0, 0x80\n\
+  " li a0, 0x80\n\
     csrw mstatus, a0\n\
     li a3, 0x3\n\
     ;csrw 0x804, a3\n\
@@ -334,7 +333,7 @@ void reset_handler(void) {
 
   // Set mepc to be main as the root app
   asm volatile(
-"   csrw mepc, %[main]\n"
-"   mret\n" : : [main]"r"(main)
+  " csrw mepc, %[main]\n"
+  " mret\n" : : [main]"r"(main)
   );
 }

@@ -1,5 +1,5 @@
 // ===================================================================================
-// Basic GPIO Functions for CH32V003                                          * v1.2 *
+// Basic GPIO Functions for CH32V003                                          * v1.3 *
 // ===================================================================================
 //
 // Pins must be defined as PA0, PA1, .., PC0, PC1, etc. - e.g.:
@@ -84,12 +84,15 @@ enum{ PA0, PA1, PA2, PA3, PA4, PA5, PA6, PA7,
 // Set PIN as INPUT (high impedance, no pullup/pulldown)
 // ===================================================================================
 #define PIN_input(PIN) \
-  ((PIN>=PA0)&&(PIN<=PA7) ? ( GPIOA->CFGLR &= ~(0b1111<<(((PIN)&7)<<2)),        \
-                              GPIOA->CFGLR |= 0b0100<<(((PIN)&7)<<2)        ) : \
-  ((PIN>=PC0)&&(PIN<=PC7) ? ( GPIOC->CFGLR &= ~(0b1111<<(((PIN)&7)<<2)),        \
-                              GPIOC->CFGLR |= 0b0100<<(((PIN)&7)<<2)        ) : \
-  ((PIN>=PD0)&&(PIN<=PD7) ? ( GPIOD->CFGLR &= ~(0b1111<<(((PIN)&7)<<2)),        \
-                              GPIOD->CFGLR |= 0b0100<<(((PIN)&7)<<2)        ) : \
+  ((PIN>=PA0)&&(PIN<=PA7) ? ( GPIOA->CFGLR =  (GPIOA->CFGLR                          \
+                                           & ~((uint32_t)0b1111<<(((PIN)&7)<<2)))    \
+                                           |  ((uint32_t)0b0100<<(((PIN)&7)<<2)) ) : \
+  ((PIN>=PC0)&&(PIN<=PC7) ? ( GPIOC->CFGLR =  (GPIOC->CFGLR                          \
+                                           & ~((uint32_t)0b1111<<(((PIN)&7)<<2)))    \
+                                           |  ((uint32_t)0b0100<<(((PIN)&7)<<2)) ) : \
+  ((PIN>=PC0)&&(PIN<=PC7) ? ( GPIOD->CFGLR =  (GPIOD->CFGLR                          \
+                                           & ~((uint32_t)0b1111<<(((PIN)&7)<<2)))    \
+                                           |  ((uint32_t)0b0100<<(((PIN)&7)<<2)) ) : \
 (0))))
 #define PIN_input_HI PIN_input
 #define PIN_input_FL PIN_input
@@ -98,39 +101,45 @@ enum{ PA0, PA1, PA2, PA3, PA4, PA5, PA6, PA7,
 // Set PIN as INPUT with internal PULLUP resistor
 // ===================================================================================
 #define PIN_input_PU(PIN) \
-  ((PIN>=PA0)&&(PIN<=PA7) ? ( GPIOA->CFGLR &= ~(0b1111<<(((PIN)&7)<<2)),        \
-                              GPIOA->CFGLR |= 0b1000<<(((PIN)&7)<<2),           \
-                              GPIOA->OUTDR |= 1<<((PIN)&7)                  ) : \
-  ((PIN>=PC0)&&(PIN<=PC7) ? ( GPIOC->CFGLR &= ~(0b1111<<(((PIN)&7)<<2)),        \
-                              GPIOC->CFGLR |= 0b1000<<(((PIN)&7)<<2),           \
-                              GPIOC->OUTDR |= 1<<((PIN)&7)                  ) : \
-  ((PIN>=PD0)&&(PIN<=PD7) ? ( GPIOD->CFGLR &= ~(0b1111<<(((PIN)&7)<<2)),        \
-                              GPIOD->CFGLR |= 0b1000<<(((PIN)&7)<<2),           \
-                              GPIOD->OUTDR |= 1<<((PIN)&7)                  ) : \
+  ((PIN>=PA0)&&(PIN<=PA7) ? ( GPIOA->CFGLR  =  (GPIOA->CFGLR                         \
+                                            & ~((uint32_t)0b1111<<(((PIN)&7)<<2)))   \
+                                            |  ((uint32_t)0b1000<<(((PIN)&7)<<2)),   \
+                              GPIOA->OUTDR |=  ((uint32_t)1<<((PIN)&7))          ) : \
+  ((PIN>=PC0)&&(PIN<=PC7) ? ( GPIOC->CFGLR  =  (GPIOC->CFGLR                         \
+                                            & ~((uint32_t)0b1111<<(((PIN)&7)<<2)))   \
+                                            |  ((uint32_t)0b1000<<(((PIN)&7)<<2)),   \
+                              GPIOC->OUTDR |=  ((uint32_t)1<<((PIN)&7))          ) : \
+  ((PIN>=PD0)&&(PIN<=PD7) ? ( GPIOD->CFGLR  =  (GPIOD->CFGLR                         \
+                                            & ~((uint32_t)0b1111<<(((PIN)&7)<<2)))   \
+                                            |  ((uint32_t)0b1000<<(((PIN)&7)<<2)),   \
+                              GPIOD->OUTDR |=  ((uint32_t)1<<((PIN)&7))          ) : \
 (0))))
 
 // ===================================================================================
 // Set PIN as INPUT with internal PULLDOWN resistor
 // ===================================================================================
 #define PIN_input_PD(PIN) \
-  ((PIN>=PA0)&&(PIN<=PA7) ? ( GPIOA->CFGLR &= ~(0b1111<<(((PIN)&7)<<2)),        \
-                              GPIOA->CFGLR |= 0b1000<<(((PIN)&7)<<2),           \
-                              GPIOA->OUTDR &= ~(1<<((PIN)&7))               ) : \
-  ((PIN>=PC0)&&(PIN<=PC7) ? ( GPIOC->CFGLR &= ~(0b1111<<(((PIN)&7)<<2)),        \
-                              GPIOC->CFGLR |= 0b1000<<(((PIN)&7)<<2),           \
-                              GPIOC->OUTDR &= ~(1<<((PIN)&7))               ) : \
-  ((PIN>=PD0)&&(PIN<=PD7) ? ( GPIOD->CFGLR &= ~(0b1111<<(((PIN)&7)<<2)),        \
-                              GPIOD->CFGLR |= 0b1000<<(((PIN)&7)<<2),           \
-                              GPIOD->OUTDR &= ~(1<<((PIN)&7))               ) : \
+  ((PIN>=PA0)&&(PIN<=PA7) ? ( GPIOA->CFGLR  =  (GPIOA->CFGLR                         \
+                                            & ~((uint32_t)0b1111<<(((PIN)&7)<<2)))   \
+                                            |  ((uint32_t)0b1000<<(((PIN)&7)<<2)),   \
+                              GPIOA->OUTDR &= ~((uint32_t)1<<((PIN)&7))          ) : \
+  ((PIN>=PC0)&&(PIN<=PC7) ? ( GPIOC->CFGLR  =  (GPIOC->CFGLR                         \
+                                            & ~((uint32_t)0b1111<<(((PIN)&7)<<2)))   \
+                                            |  ((uint32_t)0b1000<<(((PIN)&7)<<2)),   \
+                              GPIOC->OUTDR &= ~((uint32_t)1<<((PIN)&7))          ) : \
+  ((PIN>=PD0)&&(PIN<=PD7) ? ( GPIOD->CFGLR  =  (GPIOD->CFGLR                         \
+                                            & ~((uint32_t)0b1111<<(((PIN)&7)<<2)))   \
+                                            |  ((uint32_t)0b1000<<(((PIN)&7)<<2)),   \
+                              GPIOD->OUTDR &= ~((uint32_t)1<<((PIN)&7))          ) : \
 (0))))
 
 // ===================================================================================
 // Set PIN as INPUT for analog peripherals (e.g. ADC)
 // ===================================================================================
 #define PIN_input_AN(PIN) \
-  ((PIN>=PA0)&&(PIN<=PA7) ? ( GPIOA->CFGLR &= ~(0b1111<<(((PIN)&7)<<2)) ) : \
-  ((PIN>=PC0)&&(PIN<=PC7) ? ( GPIOC->CFGLR &= ~(0b1111<<(((PIN)&7)<<2)) ) : \
-  ((PIN>=PD0)&&(PIN<=PD7) ? ( GPIOD->CFGLR &= ~(0b1111<<(((PIN)&7)<<2)) ) : \
+  ((PIN>=PA0)&&(PIN<=PA7) ? ( GPIOA->CFGLR &= ~((uint32_t)0b1111<<(((PIN)&7)<<2)) ) : \
+  ((PIN>=PC0)&&(PIN<=PC7) ? ( GPIOC->CFGLR &= ~((uint32_t)0b1111<<(((PIN)&7)<<2)) ) : \
+  ((PIN>=PD0)&&(PIN<=PD7) ? ( GPIOD->CFGLR &= ~((uint32_t)0b1111<<(((PIN)&7)<<2)) ) : \
 (0))))
 #define PIN_input_AD  PIN_input_AN
 #define PIN_input_ADC PIN_input_AN
@@ -139,12 +148,15 @@ enum{ PA0, PA1, PA2, PA3, PA4, PA5, PA6, PA7,
 // Set PIN as OUTPUT (push-pull, maximum speed 10MHz)
 // ===================================================================================
 #define PIN_output(PIN) \
-  ((PIN>=PA0)&&(PIN<=PA7) ? ( GPIOA->CFGLR   &= ~(0b1111<<(((PIN)&7)<<2)),      \
-                              GPIOA->CFGLR   |= 0b0001<<(((PIN)&7)<<2)      ) : \
-  ((PIN>=PC0)&&(PIN<=PC7) ? ( GPIOC->CFGLR   &= ~(0b1111<<(((PIN)&7)<<2)),      \
-                              GPIOC->CFGLR   |= 0b0001<<(((PIN)&7)<<2)      ) : \
-  ((PIN>=PD0)&&(PIN<=PD7) ? ( GPIOD->CFGLR   &= ~(0b1111<<(((PIN)&7)<<2)),      \
-                              GPIOD->CFGLR   |= 0b0001<<(((PIN)&7)<<2)      ) : \
+  ((PIN>=PA0)&&(PIN<=PA7) ? ( GPIOA->CFGLR =  (GPIOA->CFGLR                          \
+                                           & ~((uint32_t)0b1111<<(((PIN)&7)<<2)))    \
+                                           |  ((uint32_t)0b0001<<(((PIN)&7)<<2)) ) : \
+  ((PIN>=PC0)&&(PIN<=PC7) ? ( GPIOC->CFGLR =  (GPIOC->CFGLR                          \
+                                           & ~((uint32_t)0b1111<<(((PIN)&7)<<2)))    \
+                                           |  ((uint32_t)0b0001<<(((PIN)&7)<<2)) ) : \
+  ((PIN>=PC0)&&(PIN<=PC7) ? ( GPIOD->CFGLR =  (GPIOD->CFGLR                          \
+                                           & ~((uint32_t)0b1111<<(((PIN)&7)<<2)))    \
+                                           |  ((uint32_t)0b0001<<(((PIN)&7)<<2)) ) : \
 (0))))
 #define PIN_output_PP PIN_output
 
@@ -152,12 +164,15 @@ enum{ PA0, PA1, PA2, PA3, PA4, PA5, PA6, PA7,
 // Set PIN as OUTPUT OPEN-DRAIN (maximum speed 10MHz)
 // ===================================================================================
 #define PIN_output_OD(PIN) \
-  ((PIN>=PA0)&&(PIN<=PA7) ? ( GPIOA->CFGLR   &= ~(0b1111<<(((PIN)&7)<<2)),      \
-                              GPIOA->CFGLR   |= 0b0101<<(((PIN)&7)<<2)      ) : \
-  ((PIN>=PC0)&&(PIN<=PC7) ? ( GPIOC->CFGLR   &= ~(0b1111<<(((PIN)&7)<<2)),      \
-                              GPIOC->CFGLR   |= 0b0101<<(((PIN)&7)<<2)      ) : \
-  ((PIN>=PD0)&&(PIN<=PD7) ? ( GPIOD->CFGLR   &= ~(0b1111<<(((PIN)&7)<<2)),      \
-                              GPIOD->CFGLR   |= 0b0101<<(((PIN)&7)<<2)      ) : \
+  ((PIN>=PA0)&&(PIN<=PA7) ? ( GPIOA->CFGLR =  (GPIOA->CFGLR                          \
+                                           & ~((uint32_t)0b1111<<(((PIN)&7)<<2)))    \
+                                           |  ((uint32_t)0b0101<<(((PIN)&7)<<2)) ) : \
+  ((PIN>=PC0)&&(PIN<=PC7) ? ( GPIOC->CFGLR =  (GPIOC->CFGLR                          \
+                                           & ~((uint32_t)0b1111<<(((PIN)&7)<<2)))    \
+                                           |  ((uint32_t)0b0101<<(((PIN)&7)<<2)) ) : \
+  ((PIN>=PC0)&&(PIN<=PC7) ? ( GPIOD->CFGLR =  (GPIOD->CFGLR                          \
+                                           & ~((uint32_t)0b1111<<(((PIN)&7)<<2)))    \
+                                           |  ((uint32_t)0b0101<<(((PIN)&7)<<2)) ) : \
 (0))))
 
 // ===================================================================================
@@ -289,16 +304,16 @@ static inline uint16_t ADC_read_VDD(void) {
   (PIN == PD7 ? (EXTEN->EXTEN_CTR |=  EXTEN_OPA_PSEL) : \
 (0)))
 
-#define OPA_output() {                 \
-  RCC->APB2PCENR |=   RCC_AFIOEN;      \
-  GPIOD->CFGLR   &= ~(0b1111<<(4<<2)); \
-  GPIOD->CFGLR   |=   0b1001<<(4<<2);  \
+#define OPA_output() {                                           \
+  RCC->APB2PCENR |= RCC_AFIOEN;                                  \
+  GPIOD->CFGLR    = (GPIOD->CFGLR & ~((uint32_t)0b1111<<(4<<2))) \
+                                  |  ((uint32_t)0b1001<<(4<<2)); \
 }
 
-#define OPA_output_OD() {              \
-  RCC->APB2PCENR |=   RCC_AFIOEN;      \
-  GPIOD->CFGLR   &= ~(0b1111<<(4<<2)); \
-  GPIOD->CFGLR   |=   0b1101<<(4<<2);  \
+#define OPA_output_OD() {                                        \
+  RCC->APB2PCENR |= RCC_AFIOEN;                                  \
+  GPIOD->CFGLR    = (GPIOD->CFGLR & ~((uint32_t)0b1111<<(4<<2))) \
+                                  |  ((uint32_t)0b1101<<(4<<2)); \
 }
 
 #define OPA_output_PP       OPA_output

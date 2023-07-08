@@ -105,7 +105,7 @@ python3 ./tools/rvprog.py -f <firmware>.bin
 ```
 
 ## Uploading Firmware Binary (Windows/Mac)
-WCH offers the free but closed-source software [WCH-LinkUtility](https://www.wch.cn/downloads/WCH-LinkUtility_ZIP.html) to upload the precompiled binary with Windows. Select the "WCH-LinkRV" mode in the software, open the <firmware>.bin file and upload it to the microcontroller.
+WCH offers the free but closed-source software [WCH-LinkUtility](https://www.wch.cn/downloads/WCH-LinkUtility_ZIP.html) to upload the precompiled hex-file with Windows. Select the "WCH-LinkRV" mode in the software, open the <firmware>.hex file and upload it to the microcontroller.
 
 Alternatively, there is a platform-independent open-source tool called minichlink developed by Charles Lohr (CNLohr), which can be found [here](https://github.com/cnlohr/ch32v003fun/tree/master/minichlink). It can be used with Windows, Linux and Mac.
 

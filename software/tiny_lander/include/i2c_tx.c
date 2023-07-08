@@ -1,7 +1,6 @@
 // ===================================================================================
 // Basic I2C Master Functions (write only) for CH32V003                       * v1.0 *
 // ===================================================================================
-
 // 2023 by Stefan Wagner:   https://github.com/wagiminator
 
 #include "i2c_tx.h"
@@ -20,9 +19,8 @@ void I2C_init(void) {
   RCC->APB1PCENR |= RCC_I2C1EN;
 
   // Set pin PC1 (SDA) and PC2 (SCL) to output, open-drain, 10MHz, multiplex
-  GPIOC->CFGLR &= ~((0b1111<<(1<<2)) | (0b1111<<(2<<2)));
-  GPIOC->CFGLR |=  ((0b1101<<(1<<2)) | (0b1101<<(2<<2)));
-
+  GPIOC->CFGLR = (GPIOC->CFGLR & ~(((uint32_t)0b1111<<(1<<2)) | ((uint32_t)0b1111<<(2<<2))))
+                               |  (((uint32_t)0b1101<<(1<<2)) | ((uint32_t)0b1101<<(2<<2)));
   #elif I2C_REMAP == 1
   // Remap I2C pins, enable GPIO port D and I2C module
   RCC->APB2PCENR |= RCC_AFIOEN | RCC_IOPDEN;
@@ -30,9 +28,8 @@ void I2C_init(void) {
   AFIO->PCFR1    |= 1<<1;
 
   // Set pin PD0 (SDA) and PD1 (SCL) to output, open-drain, 10MHz, multiplex
-  GPIOD->CFGLR &= ~((0b1111<<(0<<2)) | (0b1111<<(1<<2)));
-  GPIOD->CFGLR |=  ((0b1101<<(0<<2)) | (0b1101<<(1<<2)));
-
+  GPIOD->CFGLR = (GPIOD->CFGLR & ~(((uint32_t)0b1111<<(0<<2)) | ((uint32_t)0b1111<<(1<<2))))
+                               |  (((uint32_t)0b1101<<(0<<2)) | ((uint32_t)0b1101<<(1<<2)));
   #elif I2C_REMAP == 2
   // Remap I2C pins, enable GPIO port C and I2C module
   RCC->APB2PCENR |= RCC_AFIOEN | RCC_IOPCEN;
@@ -40,16 +37,14 @@ void I2C_init(void) {
   AFIO->PCFR1    |= 1<<22;
 
   // Set pin PC6 (SDA) and PC5 (SCL) to output, open-drain, 10MHz, multiplex
-  GPIOC->CFGLR &= ~((0b1111<<(6<<2)) | (0b1111<<(5<<2)));
-  GPIOC->CFGLR |=  ((0b1101<<(6<<2)) | (0b1101<<(5<<2)));
-
+  GPIOC->CFGLR = (GPIOC->CFGLR & ~(((uint32_t)0b1111<<(6<<2)) | ((uint32_t)0b1111<<(5<<2))))
+                               |  (((uint32_t)0b1101<<(6<<2)) | ((uint32_t)0b1101<<(5<<2)));
   #else
     #warning Wrong I2C REMAP
   #endif
 
   // Set logic clock rate
-  I2C1->CTLR2 &= ~I2C_CTLR2_FREQ;
-  I2C1->CTLR2 |= (F_CPU / I2C_PRERATE);
+  I2C1->CTLR2 = (I2C1->CTLR2 & ~I2C_CTLR2_FREQ) | (F_CPU / I2C_PRERATE);
 
   // Set bus clock configuration
   #if I2C_CLKRATE <= 100000

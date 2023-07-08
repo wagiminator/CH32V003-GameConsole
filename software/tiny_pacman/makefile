@@ -77,7 +77,7 @@ asm:	$(TARGET).asm removetemp size removeelf
 
 flash:	$(TARGET).bin size removeelf
 	@echo "Uploading to MCU ..."
-	$(FLASHER)
+	@$(FLASHER)
 
 clean:
 	@echo "Cleaning all up ..."
