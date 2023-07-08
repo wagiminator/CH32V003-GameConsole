@@ -64,8 +64,8 @@ To upload the firmware, you need to ensure that the Game Console is switched off
 WCH-LinkE     GameConsole
 +-------+      +-------+
 |  SWDIO| <--> |DIO    |
-|    3V3| ---> |3V3    |
 |    GND| ---> |GND    |
+|    3V3| ---> |3V3    |
 +-------+      +-------+
 ```
 

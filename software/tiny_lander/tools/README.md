@@ -17,8 +17,8 @@ To upload firmware, you should make the following connections to the WCH-LinkE:
 WCH-LinkE      MCU Board
 +-------+      +-------+
 |  SWDIO| <--> |DIO    |
-|    3V3| ---> |3V3    |
 |    GND| ---> |GND    |
+|    3V3| ---> |3V3    |
 +-------+      +-------+
 ```
 
