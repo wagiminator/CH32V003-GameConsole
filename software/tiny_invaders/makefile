@@ -26,8 +26,9 @@ FLASHER  = ./tools/minichlink -w $(TARGET).bin flash -b
 CLEAN    = rm -f *.lst *.obj *.cof *.list *.map *.eep.hex *.o *.d
 
 # Compiler Flags
-CFLAGS   = -g -Os -flto -ffunction-sections -static-libgcc -march=rv32ec -mabi=ilp32e
-CFLAGS  += -I/usr/include/newlib -I$(INCLUDE) -I. -DF_CPU=$(F_CPU) -nostdlib  -Wall
+CFLAGS   = -g -Os -flto -ffunction-sections -fno-builtin -static-libgcc -nostdlib
+CFLAGS  += -march=rv32ecxw -mabi=ilp32e -DF_CPU=$(F_CPU) -Wall
+CFLAGS  += -I/usr/include/newlib -I$(INCLUDE) -I.
 LDFLAGS  = -T$(LINKER)/ch32v003.ld -Wl,--gc-sections -L$(LINKER) -lgcc
 CFILES   = $(SKETCH) $(wildcard $(INCLUDE)/*.c) $(wildcard $(INCLUDE)/*.s)
 
