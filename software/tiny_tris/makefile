@@ -2,7 +2,7 @@
 # Project:  CH32V003 Tiny Tris
 # Author:   Stefan Wagner
 # Year:     2023
-# URL:      https://github.com/wagiminator    
+# URL:      https://github.com/wagiminator
 # ===================================================================================
 # Type "make help" in the command line.
 # ===================================================================================
@@ -27,7 +27,7 @@ CLEAN    = rm -f *.lst *.obj *.cof *.list *.map *.eep.hex *.o *.d
 
 # Compiler Flags
 CFLAGS   = -g -Os -flto -ffunction-sections -fno-builtin -static-libgcc -nostdlib
-CFLAGS  += -march=rv32ecxw -mabi=ilp32e -DF_CPU=$(F_CPU) -Wall
+CFLAGS  += -march=rv32ec -mabi=ilp32e -DF_CPU=$(F_CPU) -Wall
 CFLAGS  += -I/usr/include/newlib -I$(INCLUDE) -I.
 LDFLAGS  = -T$(LINKER)/ch32v003.ld -Wl,--gc-sections -L$(LINKER) -lgcc
 CFILES   = $(SKETCH) $(wildcard $(INCLUDE)/*.c) $(wildcard $(INCLUDE)/*.s)
