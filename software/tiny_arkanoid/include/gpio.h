@@ -90,7 +90,7 @@ enum{ PA0, PA1, PA2, PA3, PA4, PA5, PA6, PA7,
   ((PIN>=PC0)&&(PIN<=PC7) ? ( GPIOC->CFGLR =  (GPIOC->CFGLR                          \
                                            & ~((uint32_t)0b1111<<(((PIN)&7)<<2)))    \
                                            |  ((uint32_t)0b0100<<(((PIN)&7)<<2)) ) : \
-  ((PIN>=PC0)&&(PIN<=PC7) ? ( GPIOD->CFGLR =  (GPIOD->CFGLR                          \
+  ((PIN>=PD0)&&(PIN<=PD7) ? ( GPIOD->CFGLR =  (GPIOD->CFGLR                          \
                                            & ~((uint32_t)0b1111<<(((PIN)&7)<<2)))    \
                                            |  ((uint32_t)0b0100<<(((PIN)&7)<<2)) ) : \
 (0))))
@@ -154,7 +154,7 @@ enum{ PA0, PA1, PA2, PA3, PA4, PA5, PA6, PA7,
   ((PIN>=PC0)&&(PIN<=PC7) ? ( GPIOC->CFGLR =  (GPIOC->CFGLR                          \
                                            & ~((uint32_t)0b1111<<(((PIN)&7)<<2)))    \
                                            |  ((uint32_t)0b0001<<(((PIN)&7)<<2)) ) : \
-  ((PIN>=PC0)&&(PIN<=PC7) ? ( GPIOD->CFGLR =  (GPIOD->CFGLR                          \
+  ((PIN>=PD0)&&(PIN<=PD7) ? ( GPIOD->CFGLR =  (GPIOD->CFGLR                          \
                                            & ~((uint32_t)0b1111<<(((PIN)&7)<<2)))    \
                                            |  ((uint32_t)0b0001<<(((PIN)&7)<<2)) ) : \
 (0))))
@@ -170,7 +170,7 @@ enum{ PA0, PA1, PA2, PA3, PA4, PA5, PA6, PA7,
   ((PIN>=PC0)&&(PIN<=PC7) ? ( GPIOC->CFGLR =  (GPIOC->CFGLR                          \
                                            & ~((uint32_t)0b1111<<(((PIN)&7)<<2)))    \
                                            |  ((uint32_t)0b0101<<(((PIN)&7)<<2)) ) : \
-  ((PIN>=PC0)&&(PIN<=PC7) ? ( GPIOD->CFGLR =  (GPIOD->CFGLR                          \
+  ((PIN>=PD0)&&(PIN<=PD7) ? ( GPIOD->CFGLR =  (GPIOD->CFGLR                          \
                                            & ~((uint32_t)0b1111<<(((PIN)&7)<<2)))    \
                                            |  ((uint32_t)0b0101<<(((PIN)&7)<<2)) ) : \
 (0))))
