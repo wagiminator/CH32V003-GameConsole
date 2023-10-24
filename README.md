@@ -11,7 +11,7 @@ Mini Game Console utilizing the CH32V003J4M6 ultra-cheap (10 cents by the time o
 ![GameConsole_wiring.png](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_wiring.png)
 
 ## The CH32V003 Family of 32-bit RISC-V Microcontrollers
-The CH32V003 series is a collection of industrial-grade general-purpose microcontrollers that utilize the QingKe RISC-V2A core design supporting the RV32EC instruction set. These microcontrollers are equipped with various features such as a 48MHz system main frequency, wide voltage support, a single-wire serial debug interface, low power consumption, and an ultra-small package. Additionally, the CH32V003 series includes a built-in set of components including a DMA controller, a 10-bit ADC, op-amp comparators, multiple timers, and standard communication interfaces such as USART, I2C, and SPI.
+The CH32V003 series is a collection of industrial-grade general-purpose microcontrollers that utilize the QingKe RISC-V2A core design supporting the RV32EC instruction set. These microcontrollers are equipped with various features such as a 48MHz system main frequency, 16KB flash, 2KB SRAM, wide voltage support, a single-wire serial debug interface, low power consumption, and an ultra-small package. Additionally, the CH32V003 series includes a built-in set of components including a DMA controller, a 10-bit ADC, op-amp comparators, multiple timers, and standard communication interfaces such as USART, I2C, and SPI.
 
 # Games
 ## Tiny Invaders
@@ -51,12 +51,10 @@ Tiny Pacman was originally developed by [Daniel Champagne](https://www.tinyjoypa
 ![GameConsole_pacman_3.png](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_pacman_3.png)
 
 # Compiling and Uploading Firmware
-## Programming and Debugging Devices
-To program the CH32V003 microcontroller, you will need a special programming device which utilizes the proprietary single-wire serial debug interface (SDI). The [WCH-LinkE](http://www.wch-ic.com/products/WCH-Link.html) (pay attention to the "E" in the name) is a suitable device for this purpose and can be purchased commercially for around $3. This debugging tool is not only compatible with the CH32V003 but also with other WCH RISC-V and ARM-based microcontrollers.
+## Programming and Debugging Device
+To program the CH32V003 microcontroller, you will need a special programming device which utilizes the proprietary single-wire serial debug interface (SDI). The [WCH-LinkE](http://www.wch-ic.com/products/WCH-Link.html) (pay attention to the "E" in the name) is a suitable device for this purpose and can be purchased commercially for around $4. This debugging tool is not only compatible with the CH32V003 but also with other WCH RISC-V and ARM-based microcontrollers.
 
 ![CH32V003_wch-linke.jpg](https://raw.githubusercontent.com/wagiminator/Development-Boards/main/CH32V003F4P6_DevBoard/documentation/CH32V003_wch-linke.jpg)
-
-As part of his [ch32v003fun](https://github.com/cnlohr/ch32v003fun) project, Charles Lohr has also developed open-source programmers/debuggers based on STM32F042 and ESP32S2. Furthermore, the schematic diagram of the WCH-LinkE based on the CH32V305F is available on the manufacturer's [website](https://www.wch.cn/products/WCH-Link.html), but the [firmware](https://github.com/openwch/ch32v003) can only be downloaded as a binary file.
 
 To upload the firmware, you need to ensure that the Game Console is switched off or the battery is removed. Then, you should make the following connections to the WCH-LinkE:
 
@@ -70,7 +68,7 @@ WCH-LinkE     GameConsole
 ```
 
 If the blue LED on the WCH-LinkE remains illuminated once it is connected to the USB port, it means that the device is currently in ARM mode and must be switched to RISC-V mode initially. There are a few ways to accomplish this:
-- You can utilize the Python tool called rvmode.py, which is provided with the games in the software folder.
+- You can utilize the Python tool rvprog.py (with -v option), which is provided with the games in the software folder.
 - Alternatively, you can select "WCH-LinkRV" in the software provided by WCH, such as MounRiver Studio or WCH-LinkUtility.
 - Another option is to hold down the ModeS button on the device while plugging it into the USB port.
 
@@ -84,24 +82,21 @@ echo 'SUBSYSTEM=="usb", ATTR{idVendor}=="1a86", ATTR{idProduct}=="8012", MODE="6
 sudo udevadm control --reload-rules
 ```
 
-Install the GCC compiler, if you want to compile the firmware yourself:
+Install the toolchain (GCC compiler, Python3, and PyUSB):
 ```
 sudo apt install build-essential libnewlib-dev gcc-riscv64-unknown-elf
+sudo apt install python3 python3-pip
+python3 -m pip install pyusb
 ```
 
-Switch off the Game Console or remove the battery. Connect the Console via the 3-pin header to the programming device. Open a terminal and navigate to the folder with the makefile. Run the following command to compile and upload:
+Switch off the Game Console or remove the battery. Connect the Console via the 3-pin PROG header to the programming device. Open a terminal and navigate to the folder with the makefile. Run the following command to compile and upload:
 ```
 make flash
 ```
 
 If you want to just upload the pre-compiled binary, run the following command instead:
 ```
-./tools/minichlink -w <firmware>.bin flash -b
-```
-
-If you have installed [Python3](https://www.pythontutorial.net/getting-started/install-python/) and [PyUSB](https://github.com/pyusb/pyusb) on your system, you can also use the included Python tool rvprog.py:
-```
-python3 ./tools/rvprog.py -f <firmware>.bin
+python3 .tools/rvprog.py -f <firmware>.bin
 ```
 
 ## Uploading Firmware Binary (Windows/Mac)

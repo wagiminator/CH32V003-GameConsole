@@ -29,8 +29,6 @@ extern "C" {
 
 // I2C Parameters
 #define I2C_CLKRATE   400000    // I2C bus clock rate (Hz)
-#define I2C_PRERATE   4000000   // I2C logic clock rate
-#define I2C_DUTY      1         // I2C duty cycle - 0: 33%, 1: 36%
 #define I2C_REMAP     0         // I2C pin remapping (see above)
 
 // I2C Functions

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # ===================================================================================
 # Project:   rvprog - Programming Tool for WCH-LinkE and CH32Vxxx
-# Version:   v1.2
+# Version:   v1.3
 # Year:      2023
 # Author:    Stefan Wagner
 # Github:    https://github.com/wagiminator
@@ -12,7 +12,7 @@
 # ------------
 # Simple Python tool for flashing CH32Vxxx microcontrollers using the WCH-LinkE or
 # compatible programmers/debuggers. The code is based on CNLohr's minichlink.
-# Currently supports: CH32V003, CH32V203, CH32V208, CH32V303, CH32V305, CH32V307.
+# Currently supports: CH32V003, CH32V103, CH32V203, CH32V208, CH32V303, CH32V305, CH32V307.
 #
 # References:
 # -----------
@@ -35,7 +35,7 @@
 # Connect the WCH-LinkE to your PC and to your CH32Vxxx board. The WCH-LinkE must be 
 # in LinkRV mode (blue LED off)! If not, run: python rvprog.py -v
 # Run:
-# - python rvprog.py [-h] [-a] [-v] [-b] [-u] [-l] [-e] [-G] [-R] [-f FLASH]
+# - python3 rvprog.py [-h] [-a] [-v] [-b] [-u] [-l] [-e] [-G] [-R] [-f FLASH]
 #   -h, --help                show help message and exit
 #   -a, --armmode             switch WCH-Link to ARM mode
 #   -v, --rvmode              switch WCH-Link to RISC-V mode
@@ -48,7 +48,7 @@
 #   -f FLASH, --flash FLASH   write BIN file to flash
 #
 # - Example:
-#   python rvprog.py -f firmware.bin
+#   python3 rvprog.py -f firmware.bin
 
 
 import usb.core
@@ -196,15 +196,15 @@ class Programmer:
 
         # Get programmer info
         reply = self.sendcommand(b'\x81\x0d\x01\x01')
-        if reply[5] == 1:
+        if   reply[5] == 0x01:
             self.linkname = 'CH549-based WCH-Link'
-        elif reply[5] == 2:
+        elif reply[5] == 0x02:
             self.linkname = 'CH32V307-based WCH-Link'
-        elif reply[5] == 3:
+        elif reply[5] == 0x03:
             self.linkname = 'CH32V203-based WCH-Link'
-        elif reply[5] == 4:
+        elif reply[5] == 0x04:
             self.linkname = 'WCH-LinkB'
-        elif reply[5] == 18:
+        elif reply[5] == 0x12:
             self.linkname = 'WCH-LinkE'
         else:
             raise Exception('Unknown programmer')
@@ -220,10 +220,14 @@ class Programmer:
             if len(reply) < 8 or set(reply[:4]) == set((0x81, 0x55, 0x01, 0x01)):
                 time.sleep(0.2)
                 continue
-            self.chipseries =  reply[4]<<4
-            self.chiptype   = (reply[4]<<4) + (reply[5]>>4)
-            self.chipname   = 'CH32V%03x' % self.chiptype
-            if self.chipseries not in (0x000, 0x200, 0x300):
+            if reply[4] == 0x25:
+                self.chipseries = 0x100
+                self.chiptype   = 0x103
+            else:
+                self.chipseries =  reply[4]<<4
+                self.chiptype   = (reply[4]<<4) + (reply[5]>>4)
+            self.chipname = 'CH32V%03x' % self.chiptype
+            if self.chipseries not in (0x000, 0x100, 0x200, 0x300):
                 time.sleep(0.2)
                 continue
             success = 1
@@ -234,6 +238,8 @@ class Programmer:
         # Read some chip data
         if self.chipseries == 0x000:
             reply = self.sendcommand(b'\x81\x11\x01\x09')
+        elif self.chipseries == 0x100:
+            reply = self.sendcommand(b'\x81\x11\x01\x01')
         else:
             reply = self.sendcommand(b'\x81\x11\x01\x05')
         self.flashsize = int.from_bytes(reply[2:4], byteorder='big') * 1024
@@ -276,6 +282,8 @@ class Programmer:
     def lock(self):
         if self.chipseries == 0x000:
             self.sendcommand(b'\x81\x06\x08\x03\xf7\xff\xff\xff\xff\xff\xff')
+        elif self.chipseries == 0x100:
+            self.sendcommand(b'\x81\x06\x08\x03\xff\xff\xff\xff\xff\xff\xff')
         else:
             self.sendcommand(b'\x81\x06\x08\x03\x3f\xff\xff\xff\xff\xff\xff')
 
@@ -285,6 +293,8 @@ class Programmer:
         if reply[3] == 0x01:
             if self.chipseries == 0x000:
                 self.sendcommand(b'\x81\x06\x08\x02\xf7\xff\xff\xff\xff\xff\xff')
+            elif self.chipseries == 0x100:
+                self.sendcommand(b'\x81\x06\x08\x02\xff\xff\xff\xff\xff\xff\xff')
             else:
                 self.sendcommand(b'\x81\x06\x08\x02\x3f\xff\xff\xff\xff\xff\xff')
 
@@ -339,58 +349,38 @@ class Programmer:
             data = data[pagesize:]
         return result
 
-    # Write data blob to flash, 64-byte aligned (CH32V003)
-    def writebinaryblob003(self, addr, data):
-        if addr & 63:
-            raise Exception('Blob is not 64-byte aligned')
+    # Write data blob to flash
+    def writebinaryblob(self, addr, blocksize, bootloader, data):
+        if addr & (blocksize - 1):
+            raise Exception('Blob is not', blocksize, 'byte aligned')
         self.unlock()
         stream = b'\x81\x01\x08' \
                + addr.to_bytes(4, byteorder='big') \
-               + self.padlen(data, 64).to_bytes(4, byteorder='big')
+               + self.padlen(data, blocksize).to_bytes(4, byteorder='big')
         self.sendcommand(stream)
         self.sendcommand(b'\x81\x02\x01\x05')
-        pages = self.page_data(BOOTLOADER003, 128)
+        pages = self.page_data(bootloader, 128)
         for page in pages:
             self.dev.write(CH_EP_OUT_RAW, page)
         self.sendcommand(b'\x81\x02\x01\x07')
         self.sendcommand(b'\x81\x02\x01\x04')
-        pages = self.page_data(data, 64)
+        pages = self.page_data(data, blocksize)
         for page in pages:
             self.dev.write(CH_EP_OUT_RAW, page)
         reply = self.dev.read(CH_EP_IN_RAW, CH_PACKET_SIZE, CH_TIMEOUT)
         if set(reply) != set((0x41, 0x01, 0x01, 0x04)):
             raise Exception('Failed writing/verifying data blob')
 
-    # Write data blob to flash, 256-byte aligned (CH32V20x/30x)
-    def writebinaryblob203(self, addr, data):
-        if addr & 255:
-            raise Exception('Blob is not 256-byte aligned')
-        self.unlock()
-        stream = b'\x81\x01\x08' \
-               + addr.to_bytes(4, byteorder='big') \
-               + self.padlen(data, 256).to_bytes(4, byteorder='big')
-        self.sendcommand(stream)
-        self.sendcommand(b'\x81\x02\x01\x05')
-        pages = self.page_data(BOOTLOADER203, 128)
-        for page in pages:
-            self.dev.write(CH_EP_OUT_RAW, page)
-        self.sendcommand(b'\x81\x02\x01\x07')
-        self.sendcommand(b'\x81\x02\x01\x04')
-        pages = self.page_data(data, 256)
-        for page in pages:
-            self.dev.write(CH_EP_OUT_RAW, page)
-        reply = self.dev.read(CH_EP_IN_RAW, CH_PACKET_SIZE, CH_TIMEOUT)
-        if set(reply) != set((0x41, 0x01, 0x01, 0x04)):
-           raise Exception('Failed writing/verifying data blob')
-
     # Write data to code flash
     def flash_data(self, data):
         if len(data) > self.flashsize:
             raise Exception('Not enough memory')
         if self.chipseries == 0x000:
-            self.writebinaryblob003(CH_CODE_BASE, data)
+            self.writebinaryblob(CH_CODE_BASE,  64, BOOTLOADER003, data)
+        elif self.chipseries == 0x100:
+            self.writebinaryblob(CH_CODE_BASE, 128, BOOTLOADER103, data)
         else:
-            self.writebinaryblob203(CH_CODE_BASE, data)
+            self.writebinaryblob(CH_CODE_BASE, 256, BOOTLOADER203, data)
 
 # ===================================================================================
 # Device Constants
@@ -449,6 +439,36 @@ BOOTLOADER003 = \
     +b"\xa2\x46\x32\x47\xb2\x87\xe3\xe0\xe6\xfe\x01\x45\x61\xb7\x41\x45" \
     +b"\x51\xb7"
 
+BOOTLOADER103 = \
+     b"\x93\x77\x15\x00\x41\x11\x99\xcf\xb7\x06\x67\x45\xb7\x27\x02\x40" \
+    +b"\x93\x86\x36\x12\x37\x97\xef\xcd\xd4\xc3\x13\x07\xb7\x9a\xd8\xc3" \
+    +b"\xd4\xd3\xd8\xd3\x93\x77\x25\x00\x9d\xc7\xb7\x27\x02\x40\x98\x4b" \
+    +b"\xad\x66\x37\x38\x00\x40\x13\x67\x47\x00\x98\xcb\x98\x4b\x93\x86" \
+    +b"\xa6\xaa\x13\x67\x07\x04\x98\xcb\xd8\x47\x05\x8b\x63\x1f\x07\x10" \
+    +b"\x98\x4b\x6d\x9b\x98\xcb\x93\x77\x45\x00\xa9\xcb\x93\x07\xf6\x07" \
+    +b"\x9d\x83\x2e\xc0\x2d\x68\x81\x76\x3e\xc4\xb7\x08\x02\x00\xb7\x27" \
+    +b"\x02\x40\x37\x33\x00\x40\x13\x08\xa8\xaa\xfd\x16\x98\x4b\x33\x67" \
+    +b"\x17\x01\x98\xcb\x02\x47\xd8\xcb\x98\x4b\x13\x67\x07\x04\x98\xcb" \
+    +b"\xd8\x47\x05\x8b\x71\xef\x98\x4b\x75\x8f\x98\xcb\x02\x47\x13\x07" \
+    +b"\x07\x08\x3a\xc0\x22\x47\x7d\x17\x3a\xc4\x69\xfb\x93\x77\x85\x00" \
+    +b"\xed\xc3\x93\x07\xf6\x07\x2e\xc0\x9d\x83\x37\x27\x02\x40\x3e\xc4" \
+    +b"\x1c\x4b\xc1\x66\x37\x08\x08\x00\xd5\x8f\x1c\xcb\xa1\x48\x37\x17" \
+    +b"\x00\x20\xb7\x27\x02\x40\x37\x03\x04\x00\x94\x4b\xb3\xe6\x06\x01" \
+    +b"\x94\xcb\xd4\x47\x85\x8a\xf5\xfe\x82\x46\x3a\x8e\x36\xc2\x46\xc6" \
+    +b"\x92\x46\x83\x2e\x07\x00\x41\x07\x23\xa0\xd6\x01\x92\x46\x83\x2e" \
+    +b"\x47\xff\x23\xa2\xd6\x01\x92\x46\x83\x2e\x87\xff\x23\xa4\xd6\x01" \
+    +b"\x92\x46\x03\x2e\xce\x00\x23\xa6\xc6\x01\x94\x4b\xb3\xe6\x66\x00" \
+    +b"\x94\xcb\xd4\x47\x85\x8a\xf5\xfe\x92\x46\x3a\x8e\xc1\x06\x36\xc2" \
+    +b"\xb2\x46\xfd\x16\x36\xc6\xcd\xfe\x82\x46\xd4\xcb\x94\x4b\x93\xe6" \
+    +b"\x06\x04\x94\xcb\xd4\x47\x85\x8a\xf5\xfe\xd4\x47\xd1\x8a\x85\xc6" \
+    +b"\xd8\x47\xb7\x06\xf3\xff\xfd\x16\x13\x67\x47\x01\xd8\xc7\x98\x4b" \
+    +b"\x21\x45\x75\x8f\x98\xcb\x41\x01\x02\x90\x23\x20\xd8\x00\xe9\xbd" \
+    +b"\x23\x20\x03\x01\x31\xbf\x82\x46\x93\x86\x06\x08\x36\xc0\xa2\x46" \
+    +b"\xfd\x16\x36\xc4\xb9\xfa\x98\x4b\xb7\x06\xf3\xff\xfd\x16\x75\x8f" \
+    +b"\x98\xcb\x41\x89\x15\xc9\x2e\xc0\x0d\x06\x02\xc4\x09\x82\x32\xc6" \
+    +b"\xb7\x17\x00\x20\x98\x43\x13\x86\x47\x00\xa2\x47\x82\x46\x8a\x07" \
+    +b"\xb6\x97\x9c\x43\x63\x1c\xf7\x00\xa2\x47\x85\x07\x3e\xc4\xa2\x46" \
+    +b"\x32\x47\xb2\x87\xe3\xe0\xe6\xfe\x01\x45\x71\xbf\x41\x45\x61\xbf"
 
 BOOTLOADER203 = \
      b"\x93\x77\x15\x00\x41\x11\x99\xcf\xb7\x06\x67\x45\xb7\x27\x02\x40" \

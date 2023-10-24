@@ -1,5 +1,5 @@
 // ===================================================================================
-// Basic GPIO Functions for CH32V003                                          * v1.3 *
+// Basic GPIO Functions for CH32V003                                          * v1.4 *
 // ===================================================================================
 //
 // Pins must be defined as PA0, PA1, .., PC0, PC1, etc. - e.g.:
@@ -10,11 +10,11 @@
 // PIN_input(PIN)           Set PIN as INPUT (floating, no pullup/pulldown)
 // PIN_input_PU(PIN)        Set PIN as INPUT with internal PULLUP resistor
 // PIN_input_PD(PIN)        Set PIN as INPUT with internal PULLDOWN resistor
-// PIN_input_AN(PIN)        Set PIN as INPUT for analog peripherals (e.g. ADC)
+// PIN_input_AN(PIN)        Set PIN as INPUT for analog peripherals (e.g. ADC) (*)
 // PIN_output(PIN)          Set PIN as OUTPUT (push-pull)
 // PIN_output_OD(PIN)       Set PIN as OUTPUT (open-drain)
 //
-// PIN_low(PIN)             Set PIN output value to LOW
+// PIN_low(PIN)             Set PIN output value to LOW (*)
 // PIN_high(PIN)            Set PIN output value to HIGH
 // PIN_toggle(PIN)          TOGGLE PIN output value
 // PIN_read(PIN)            Read PIN input value
@@ -35,9 +35,10 @@
 // ADC_init()               Init, enable and calibrate ADC (must be called first)
 // ADC_enable()             enable ADC (power-up)
 // ADC_disable()            disable ADC (power-down)
-// ADC_fast()               set fast mode   ( 28 clock cycles, least accurate, default)
+// ADC_fast()               set fast mode   ( 28 clock cycles, least accurate) (*)
 // ADC_slow()               set slow mode   (504 clock cycles, most accurate)
 // ADC_medium()             set medium mode (168 clock cycles, medium accurate)
+// ADC_calibrate()          calibrate ADC
 //
 // ADC_input(PIN)           Set PIN as ADC input
 // ADC_input_VREF()         Set internal voltage referece (Vref) as ADC input
@@ -56,6 +57,7 @@
 //
 // Notes:
 // ------
+// - (*) default state
 // - Pins used for ADC must be set with PIN_input_AN beforehand. Only the following 
 //   pins can be used as INPUT for the ADC: PA1, PA2, PC4, PD2, PD3, PD4, PD5, PD6.
 // - Pins used as input for OPA comparator must be set with PIN_input_AN beforehand.
@@ -71,7 +73,7 @@
 extern "C" {
 #endif
 
-#include "ch32v003.h"
+#include "system.h"
 
 // ===================================================================================
 // Enumerate PIN designators (use these designators to define pins)
@@ -267,13 +269,18 @@ enum{ PA0, PA1, PA2, PA3, PA4, PA5, PA6, PA7,
   (PIN == PD6 ? (ADC1->RSQR3 = 6) : \
 (0)))))))))
 
+static inline void ADC_calibrate(void) {
+  ADC1->CTLR2 |= ADC_RSTCAL;                    // reset calibration
+  while(ADC1->CTLR2 & ADC_RSTCAL);              // wait until finished
+  ADC1->CTLR2 |= ADC_CAL;                       // start calibration
+  while(ADC1->CTLR2 & ADC_CAL);                 // wait until finished
+}
+
 static inline void ADC_init(void) {
   RCC->APB2PCENR |= RCC_ADC1EN | RCC_AFIOEN;    // enable ADC and AFIO
-  ADC1->CTLR2   = ADC_ADON | ADC_EXTSEL;        // turn on ADC, software triggering
-  ADC1->CTLR2  |= ADC_RSTCAL;                   // reset calibration
-  while(ADC1->CTLR2 & ADC_RSTCAL);              // wait until finished
-  ADC1->CTLR2  |= ADC_CAL;                      // start calibration
-  while(ADC1->CTLR2 & ADC_CAL);                 // wait until finished
+  ADC1->CTLR2 = ADC_ADON | ADC_EXTSEL;          // turn on ADC, software triggering
+  DLY_us(10);                                   // wait to settle
+  ADC_calibrate();                              // calibrate ADC
 }
 
 static inline uint16_t ADC_read(void) {
