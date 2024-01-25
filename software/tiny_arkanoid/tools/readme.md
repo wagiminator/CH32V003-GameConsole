@@ -1,6 +1,6 @@
 # rvprog.py - WCH-LinkE Programming Tool
 ## Description
-This tool enables programming of WCH RISC-V microcontrollers (CH32Vxxx) through their serial debug interface using [WCH-LinkE](http://www.wch-ic.com/products/WCH-Link.html) (please note the "E" in the name).
+This tool enables programming of WCH RISC-V microcontrollers (CH32Vxxx and CH32Xxxx) through their serial debug interface using [WCH-LinkE](http://www.wch-ic.com/products/WCH-Link.html) (please note the "E" in the name).
 
 ## Preparations
 In order for this tools to work, Python3 must be installed on your system. To do this, follow these [instructions](https://www.pythontutorial.net/getting-started/install-python/). In addition [PyUSB](https://github.com/pyusb/pyusb) must be installed. On Linux (Debian-based), all of this can be done with the following commands:
@@ -47,12 +47,12 @@ Optional arguments:
   -h, --help                show help message and exit
   -a, --armmode             switch WCH-Link to ARM mode
   -v, --rvmode              switch WCH-Link to RISC-V mode
-  -b, --unbrick             unbrick chip
+  -b, --unbrick             unbrick chip (CH32V003 only)
   -u, --unlock              unlock chip (remove read protection)
   -l, --lock                lock chip (set read protection)
   -e, --erase               perform a whole chip erase
-  -G, --pingpio             make nRST pin a GPIO pin
-  -R, --pinreset            make nRST pin a reset pin
+  -G, --pingpio             make nRST pin a GPIO pin (CH32V003 only)
+  -R, --pinreset            make nRST pin a reset pin (CH32V003 only)
   -f FLASH, --flash FLASH   write BIN file to flash
 
 Example:

@@ -1,5 +1,5 @@
 // ===================================================================================
-// Basic System Functions for CH32V003                                        * v1.4 *
+// Basic System Functions for CH32V003                                        * v1.5 *
 // ===================================================================================
 //
 // This file must be included!!!!
@@ -32,7 +32,7 @@ void SYS_init(void) {
 
   // Enable GPIO
   #if SYS_GPIO_EN > 0
-  RCC->APB2PCENR |= RCC_IOPAEN | RCC_IOPCEN | RCC_IOPDEN;
+    RCC->APB2PCENR |= RCC_IOPAEN | RCC_IOPCEN | RCC_IOPDEN;
   #endif
 }
 
@@ -130,44 +130,55 @@ void IWDG_reload(uint16_t ms) {
 }
 
 // ===================================================================================
-// Sleep Functions
+// Automatic Wake-up Timer (AWU) Functions
 // ===================================================================================
 
 // Init automatic wake-up timer
 void AWU_init(void) {
   LSI_enable();                         // enable internal low-speed clock (LSI)
   EXTI->EVENR |= ((uint32_t)1<<9);      // enable AWU event
-  EXTI->FTENR |= ((uint32_t)1<<9);      // enable AWU falling edge triggering
+  EXTI->RTENR |= ((uint32_t)1<<9);      // enable AWU rising edge triggering
   RCC->APB1PCENR |= RCC_PWREN;          // enable power module
   PWR->AWUCSR = PWR_AWUCSR_AWUEN;       // enable automatic wake-up timer
 }
 
+// Stop automatic wake-up timer
+void AWU_stop(void) {
+  PWR->AWUCSR  = 0x00;                  // disable automatic wake-up timer
+  EXTI->EVENR &= ~((uint32_t)1<<9);     // disable AWU event
+  EXTI->RTENR &= ~((uint32_t)1<<9);     // disable AWU rising edge triggering
+}
+
+// ===================================================================================
+// Sleep Functions
+// ===================================================================================
+
 // Put device into sleep, wake up by interrupt
 void SLEEP_WFI_now(void) {
-  PWR->CTLR &= ~PWR_CTLR_PDDS;          // set power-down mode to sleep
+  PWR->CTLR   &= ~PWR_CTLR_PDDS;        // set power-down mode to sleep
+  PFIC->SCTLR &= ~PFIC_SLEEPDEEP;
   __WFI();                              // wait for interrupt
 }
 
 // Put device into sleep, wake up by event
 void SLEEP_WFE_now(void) {
-  PWR->CTLR &= ~PWR_CTLR_PDDS;          // set power-down mode to sleep
+  PWR->CTLR   &= ~PWR_CTLR_PDDS;        // set power-down mode to sleep
+  PFIC->SCTLR &= ~PFIC_SLEEPDEEP;
   __WFE();                              // wait for event
 }
 
 // Put device into standby (deep sleep), wake up interrupt
 void STDBY_WFI_now(void) {
   PWR->CTLR   |= PWR_CTLR_PDDS;         // set power-down mode to standby (deep sleep)
-  PFIC->SCTLR |= PFIC_SLEEPDEEP;        // set deep sleep mode
+  PFIC->SCTLR |= PFIC_SLEEPDEEP;
   __WFI();                              // wait for interrupt
-  PFIC->SCTLR &= ~PFIC_SLEEPDEEP;       // unset deep sleep mode
 }
 
 // Put device into standby (deep sleep), wake up event
 void STDBY_WFE_now(void) {
   PWR->CTLR   |= PWR_CTLR_PDDS;         // set power-down mode to standby (deep sleep)
-  PFIC->SCTLR |= PFIC_SLEEPDEEP;        // set deep sleep mode
+  PFIC->SCTLR |= PFIC_SLEEPDEEP;
   __WFE();                              // wait for event
-  PFIC->SCTLR &= ~PFIC_SLEEPDEEP;       // unset deep sleep mode
 }
 
 // ===================================================================================
@@ -296,9 +307,15 @@ void reset_handler(void) {
   
   // Set pointers, vectors, processor status, and interrupts
   asm volatile(
-  " la gp, __global_pointer$  \n\
-    la sp, _eusrstack         \n\
-    li a0, 0x80               \n\
+  " .option push              \n\
+    .option norelax           \n\
+    la gp, __global_pointer$  \n\
+    .option pop               \n\
+    la sp, _eusrstack         \n"
+    #if __GNUC__ > 10
+    ".option arch, +zicsr     \n"
+    #endif
+  " li a0, 0x88               \n\
     csrw mstatus, a0          \n\
     li a1, 0x3                \n\
     csrw 0x804, a1            \n\
