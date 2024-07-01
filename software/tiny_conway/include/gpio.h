@@ -1,5 +1,5 @@
 // ===================================================================================
-// Basic GPIO Functions for CH32V003                                          * v1.5 *
+// Basic GPIO Functions for CH32V003                                          * v1.6 *
 // ===================================================================================
 //
 // Pins must be defined as PA0, PA1, .., PC0, PC1, etc. - e.g.:
@@ -21,6 +21,18 @@
 // PIN_toggle(PIN)          TOGGLE PIN output value
 // PIN_read(PIN)            Read PIN input value
 // PIN_write(PIN, val)      Write PIN output value (0 = LOW / 1 = HIGH)
+//
+// PIN interrupt and event functions available:
+// --------------------------------------------
+// PIN_EVT_set(PIN,TYPE)    Setup PIN event TYPE:
+//                          PIN_EVT_OFF, PIN_EVT_RISING, PIN_EVT_FALLING, PIN_EVT_BOTH
+// PIN_INT_set(PIN,TYPE)    Setup PIN interrupt TYPE:
+//                          PIN_INT_OFF, PIN_INT_RISING, PIN_INT_FALLING, PIN_INT_BOTH
+// PIN_INT_enable()         Enable PIN interrupts
+// PIN_INT_disable()        Disable PIN interrupts
+// PIN_INTFLAG_read(PIN)    Read interrupt flag of PIN
+// PIN_INTFLAG_clear(PIN)   Clear interrupt flag of PIN
+// PIN_INT_ISR { }          Pin interrupt service routine
 //
 // PORT functions available:
 // -------------------------
@@ -67,6 +79,8 @@
 // Notes:
 // ------
 // - (*) default state
+// - For interrupts and events: Each PIN number can only be used once simultaneously.
+//   (For example, PA1 and PC1 cannot be used simultaneously, but PA1 and PC2).
 // - Pins used for ADC must be set with PIN_input_AN beforehand. Only the following 
 //   pins can be used as INPUT for the ADC: PA1, PA2, PC4, PD2, PD3, PD4, PD5, PD6.
 // - Pins used as input for OPA comparator must be set with PIN_input_AN beforehand.
@@ -257,6 +271,61 @@ enum{ PA0, PA1, PA2, PA3, PA4, PA5, PA6, PA7,
 // Write PIN output value (0 = LOW / 1 = HIGH)
 // ===================================================================================
 #define PIN_write(PIN, val) (val)?(PIN_high(PIN)):(PIN_low(PIN))
+
+// ===================================================================================
+// Setup PIN interrupt
+// ===================================================================================
+enum{PIN_INT_OFF, PIN_INT_RISING, PIN_INT_FALLING, PIN_INT_BOTH};
+
+#define PIN_INT_set(PIN, TYPE) { \
+  ((PIN>=PA0)&&(PIN<=PA7) ? ({RCC->APB2PCENR |=  RCC_AFIOEN | RCC_IOPAEN;            \
+                              AFIO->EXTICR   &= ~((uint32_t)3<<(((PIN)&7)<<1)); }) : \
+  ((PIN>=PC0)&&(PIN<=PC7) ? ({RCC->APB2PCENR |=  RCC_AFIOEN | RCC_IOPCEN;            \
+                              AFIO->EXTICR    =  (AFIO->EXTICR                       \
+                                              & ~((uint32_t)3<<(((PIN)&7)<<1)))      \
+                                              |  ((uint32_t)2<<(((PIN)&7)<<1)); }) : \
+  ((PIN>=PD0)&&(PIN<=PD7) ? ({RCC->APB2PCENR |=  RCC_AFIOEN | RCC_IOPDEN;            \
+                              AFIO->EXTICR   |=  ((uint32_t)3<<(((PIN)&7)<<1)); }) : \
+  (0)))); \
+  (TYPE & 3) ? (EXTI->INTENR |=   (uint32_t)1<<((PIN)&7)) : \
+               (EXTI->INTENR &= ~((uint32_t)1<<((PIN)&7))); \
+  (TYPE & 1) ? (EXTI->RTENR  |=   (uint32_t)1<<((PIN)&7)) : \
+               (EXTI->RTENR  &= ~((uint32_t)1<<((PIN)&7))); \
+  (TYPE & 2) ? (EXTI->FTENR  |=   (uint32_t)1<<((PIN)&7)) : \
+               (EXTI->FTENR  &= ~((uint32_t)1<<((PIN)&7))); \
+}
+
+#define PIN_INT_enable()        NVIC_EnableIRQ(EXTI7_0_IRQn)
+#define PIN_INT_disable()       NVIC_DisableIRQ(EXTI7_0_IRQn)
+
+#define PIN_INTFLAG_read(PIN)   (EXTI->INTFR & ((uint32_t)1 << ((PIN) & 7)))
+#define PIN_INTFLAG_clear(PIN)  EXTI->INTFR = ((uint32_t)1 << ((PIN) & 7))
+
+#define PIN_INT_ISR             void EXTI7_0_IRQHandler(void) __attribute__((interrupt));\
+                                void EXTI7_0_IRQHandler(void)
+
+// ===================================================================================
+// Setup PIN event
+// ===================================================================================
+enum{PIN_EVT_OFF, PIN_EVT_RISING, PIN_EVT_FALLING, PIN_EVT_BOTH};
+
+#define PIN_EVT_set(PIN, TYPE) { \
+  ((PIN>=PA0)&&(PIN<=PA7) ? ({RCC->APB2PCENR |=  RCC_AFIOEN | RCC_IOPAEN;            \
+                              AFIO->EXTICR   &= ~((uint32_t)3<<(((PIN)&7)<<1)); }) : \
+  ((PIN>=PC0)&&(PIN<=PC7) ? ({RCC->APB2PCENR |=  RCC_AFIOEN | RCC_IOPCEN;            \
+                              AFIO->EXTICR    =  (AFIO->EXTICR                       \
+                                              & ~((uint32_t)3<<(((PIN)&7)<<1)))      \
+                                              |  ((uint32_t)2<<(((PIN)&7)<<1)); }) : \
+  ((PIN>=PD0)&&(PIN<=PD7) ? ({RCC->APB2PCENR |=  RCC_AFIOEN | RCC_IOPDEN;            \
+                              AFIO->EXTICR   |=  ((uint32_t)3<<(((PIN)&7)<<1)); }) : \
+  (0)))); \
+  (TYPE & 3) ? (EXTI->EVENR |=   (uint32_t)1<<((PIN)&7)) : \
+               (EXTI->EVENR &= ~((uint32_t)1<<((PIN)&7))); \
+  (TYPE & 1) ? (EXTI->RTENR |=   (uint32_t)1<<((PIN)&7)) : \
+               (EXTI->RTENR &= ~((uint32_t)1<<((PIN)&7))); \
+  (TYPE & 2) ? (EXTI->FTENR |=   (uint32_t)1<<((PIN)&7)) : \
+               (EXTI->FTENR &= ~((uint32_t)1<<((PIN)&7))); \
+}
 
 // ===================================================================================
 // Enable GPIO PORTS

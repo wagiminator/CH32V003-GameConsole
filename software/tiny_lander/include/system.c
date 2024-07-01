@@ -1,5 +1,5 @@
 // ===================================================================================
-// Basic System Functions for CH32V003                                        * v1.5 *
+// Basic System Functions for CH32V003                                        * v1.6 *
 // ===================================================================================
 //
 // This file must be included!!!!
@@ -104,6 +104,22 @@ void DLY_ticks(uint32_t n) {
 }
 
 // ===================================================================================
+// Bootloader (BOOT) Functions
+// ===================================================================================
+
+// Perform software reset and jump to bootloader
+void BOOT_now(void) {
+  FLASH->KEYR = 0x45670123;
+  FLASH->KEYR = 0xCDEF89AB;
+  FLASH->BOOT_MODEKEYR = 0x45670123;
+  FLASH->BOOT_MODEKEYR = 0xCDEF89AB;      // unlock flash
+  FLASH->STATR |= (uint16_t)1<<14;        // start bootloader after software reset
+  FLASH->CTLR  |= FLASH_CTLR_LOCK;        // lock flash
+  RCC->RSTSCKR |= RCC_RMVF;               // clear reset flags
+  PFIC->CFGR = PFIC_RESETSYS | PFIC_KEY3; // perform software reset
+}
+
+// ===================================================================================
 // Independent Watchdog Timer (IWDG) Functions
 // ===================================================================================
 
@@ -155,30 +171,32 @@ void AWU_stop(void) {
 
 // Put device into sleep, wake up by interrupt
 void SLEEP_WFI_now(void) {
-  PWR->CTLR   &= ~PWR_CTLR_PDDS;        // set power-down mode to sleep
-  PFIC->SCTLR &= ~PFIC_SLEEPDEEP;
+  PFIC->SCTLR &= ~PFIC_SLEEPDEEP;       // set power-down mode to sleep
   __WFI();                              // wait for interrupt
 }
 
 // Put device into sleep, wake up by event
 void SLEEP_WFE_now(void) {
-  PWR->CTLR   &= ~PWR_CTLR_PDDS;        // set power-down mode to sleep
-  PFIC->SCTLR &= ~PFIC_SLEEPDEEP;
+  PFIC->SCTLR &= ~PFIC_SLEEPDEEP;       // set power-down mode to sleep
   __WFE();                              // wait for event
 }
 
 // Put device into standby (deep sleep), wake up interrupt
 void STDBY_WFI_now(void) {
+  RCC->APB1PCENR |= RCC_PWREN;          // enable power module
   PWR->CTLR   |= PWR_CTLR_PDDS;         // set power-down mode to standby (deep sleep)
   PFIC->SCTLR |= PFIC_SLEEPDEEP;
   __WFI();                              // wait for interrupt
+  PWR->CTLR   &= ~PWR_CTLR_PDDS;        // disable PDDS again
 }
 
 // Put device into standby (deep sleep), wake up event
 void STDBY_WFE_now(void) {
+  RCC->APB1PCENR |= RCC_PWREN;          // enable power module
   PWR->CTLR   |= PWR_CTLR_PDDS;         // set power-down mode to standby (deep sleep)
   PFIC->SCTLR |= PFIC_SLEEPDEEP;
   __WFE();                              // wait for event
+  PWR->CTLR   &= ~PWR_CTLR_PDDS;        // disable PDDS again
 }
 
 // ===================================================================================

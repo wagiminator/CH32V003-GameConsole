@@ -1,5 +1,5 @@
 // ===================================================================================
-// Header file for CH32V003                                                   * v1.3 *
+// Header file for CH32V003                                                   * v1.4 *
 // ===================================================================================
 // This contains a copy of ch32v00x.h and core_riscv.h and other misc functions.
 // NOTE: This file includes modifications by CNLohr.
@@ -22,11 +22,19 @@
 #define __MPU_PRESENT             0  /* Other CH32 devices does not provide an MPU */
 #define __Vendor_SysTickConfig    0  /* Set to 1 if different SysTick Config is used */
 
+#ifdef __ASSEMBLER__
+#define HSE_VALUE                 (24000000)  /* Value of the external oscillator in Hz */
+#define HSI_VALUE                 (24000000)  /* Value of the internal oscillator in Hz */
+#define LSI_VALUE                 (  128000)  /* Value of the internal low-speed oscillator in Hz */
+#define HSE_STARTUP_TIMEOUT       (  0x2000)  /* Time out for HSE start up */
+#define HSITRIM                   (    0x10)  /* HSI TRIM value */
+#else
 #define HSE_VALUE                 ((uint32_t)24000000)  /* Value of the external oscillator in Hz */
 #define HSI_VALUE                 ((uint32_t)24000000)  /* Value of the internal oscillator in Hz */
 #define LSI_VALUE                 ((uint32_t)  128000)  /* Value of the internal low-speed oscillator in Hz */
 #define HSE_STARTUP_TIMEOUT       ((uint16_t)  0x2000)  /* Time out for HSE start up */
-#define HSITRIM                   0x10                  /* HSI TRIM value */
+#define HSITRIM                   ((uint8_t)     0x10)  /* HSI TRIM value */
+#endif
 
 /* Standard Peripheral Library old definitions (maintained for legacy purpose) */
 #define HSI_Value                 HSI_VALUE
@@ -34,6 +42,7 @@
 #define HSEStartUp_TimeOut        HSE_STARTUP_TIMEOUT
 
 #ifndef __ASSEMBLER__             // Things before this can be used in assembly.
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -86,22 +95,8 @@ typedef enum IRQn
 #define     __IO    volatile            /*!< defines 'read / write' permissions */
 
 /* define compiler specific symbols */
-#if defined(__CC_ARM)
-  #define __ASM       __asm             /*!< asm keyword for ARM Compiler       */
-  #define __INLINE    __inline          /*!< inline keyword for ARM Compiler    */
-
-#elif defined(__ICCARM__)
-  #define __ASM       __asm             /*!< asm keyword for IAR Compiler       */
-  #define __INLINE    inline  /*!< inline keyword for IAR Compiler. Only avaiable in High optimization mode! */
-
-#elif defined(__GNUC__)
-  #define __ASM       __asm             /*!< asm keyword for GNU Compiler       */
-  #define __INLINE    inline            /*!< inline keyword for GNU Compiler    */
-
-#elif defined(__TASKING__)
-  #define __ASM       __asm             /*!< asm keyword for TASKING Compiler     */
-  #define __INLINE    inline            /*!< inline keyword for TASKING Compiler  */
-#endif
+#define __ASM       __asm               /*!< asm keyword for GNU Compiler       */
+#define __INLINE    inline              /*!< inline keyword for GNU Compiler    */
 
 typedef enum {NoREADY = 0, READY = !NoREADY} ErrorStatus;
 typedef enum {DISABLE = 0, ENABLE = !DISABLE} FunctionalState;
@@ -414,16 +409,26 @@ typedef struct
     __IO uint32_t EXTEN_CTR;
 } EXTEN_TypeDef;
 
-#endif
+#endif    // __ASSEMBLER__
 
 #ifdef __ASSEMBLER__
 #define FLASH_BASE                              (0x08000000) /* FLASH base address in the alias region */
 #define SRAM_BASE                               (0x20000000) /* SRAM base address in the alias region */
 #define PERIPH_BASE                             (0x40000000) /* Peripheral base address in the alias region */
+#define OB_BASE                                 (0x1FFFF800) /* Flash Option Bytes base address */
+#define ESIG_BASE                               (0x1FFFF7E0)
+#define EXTEN_BASE                              (0x40023800)
+#define PFIC_BASE                               (0xE000E000)
+#define STK_BASE                                (0xE000F000)
 #else
 #define FLASH_BASE                              ((uint32_t)0x08000000) /* FLASH base address in the alias region */
 #define SRAM_BASE                               ((uint32_t)0x20000000) /* SRAM base address in the alias region */
 #define PERIPH_BASE                             ((uint32_t)0x40000000) /* Peripheral base address in the alias region */
+#define OB_BASE                                 ((uint32_t)0x1FFFF800) /* Flash Option Bytes base address */
+#define ESIG_BASE                               ((uint32_t)0x1FFFF7E0)
+#define EXTEN_BASE                              ((uint32_t)0x40023800)
+#define PFIC_BASE                               ((uint32_t)0xE000E000)
+#define STK_BASE                                ((uint32_t)0xE000F000)
 #endif
 
 #define APB1PERIPH_BASE                         (PERIPH_BASE)
@@ -455,11 +460,7 @@ typedef struct
 #define DMA1_Channel6_BASE                      (AHBPERIPH_BASE + 0x006C)
 #define DMA1_Channel7_BASE                      (AHBPERIPH_BASE + 0x0080)
 #define RCC_BASE                                (AHBPERIPH_BASE + 0x1000)
-
 #define FLASH_R_BASE                            (AHBPERIPH_BASE + 0x2000) /* Flash registers base address */
-#define OB_BASE                                 ((uint32_t)0x1FFFF800)    /* Flash Option Bytes base address */
-#define ESIG_BASE                               ((uint32_t)0x1FFFF7E0)
-#define EXTEN_BASE                              ((uint32_t)0x40023800)
 
 /* Peripheral declaration */
 #define TIM2                                    ((TIM_TypeDef *)TIM2_BASE)
@@ -490,8 +491,8 @@ typedef struct
 #define ESIG                                    ((ESIG_TypeDef *)ESIG_BASE)
 #define EXTEN                                   ((EXTEN_TypeDef *)EXTEN_BASE)
 
-#define PFIC                                    ((PFIC_TypeDef *) 0xE000E000)
-#define STK                                     ((STK_TypeDef *) 0xE000F000)
+#define PFIC                                    ((PFIC_TypeDef *)PFIC_BASE)
+#define STK                                     ((STK_TypeDef *)STK_BASE)
 
 #define NVIC                                    PFIC
 #define SysTick                                 STK

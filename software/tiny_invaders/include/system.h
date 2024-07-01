@@ -1,5 +1,5 @@
 // ===================================================================================
-// Basic System Functions for CH32V003                                        * v1.5 *
+// Basic System Functions for CH32V003                                        * v1.6 *
 // ===================================================================================
 //
 // This file must be included!!! The system configuration and the system clock are 
@@ -45,8 +45,9 @@
 // DLY_us(n)                delay n microseconds
 // DLY_ms(n)                delay n milliseconds
 //
-// Reset (RST) functions available:
-// --------------------------------
+// Reset (RST) and Bootloader (BOOT) functions available:
+// ------------------------------------------------------
+// BOOT_now()               conduct software reset and jump to bootloader
 // RST_now()                conduct software reset
 // RST_clearFlags()         clear all reset flags
 // RST_wasLowPower()        check if last reset was caused by low power
@@ -86,6 +87,19 @@
 //
 // SLEEP_ms(n)              put device into SLEEP for n milliseconds (uses AWU)
 // STDBY_ms(n)              put device into STANDBY for n milliseconds (uses AWU)
+//
+// Programmable Voltage Detector (PVD) functions available:
+// --------------------------------------------------------
+// PVD_enable()             enable PVD
+// PVD_set_2V7()            set detection level to 2.7V  falling / 2.85V rising edge
+// PVD_set_2V9()            set detection level to 2.9V  falling / 3.05V rising edge
+// PVD_set_3V15()           set detection level to 3.15V falling / 3.3V  rising edge
+// PVD_set_3V3()            set detection level to 3.3V  falling / 3.5V  rising edge
+// PVD_set_3V5()            set detection level to 3.5V  falling / 3.7V  rising edge
+// PVD_set_3V7()            set detection level to 3.7V  falling / 3.9V  rising edge
+// PVD_set_3V9()            set detection level to 3.9V  falling / 4.1V  rising edge
+// PVD_set_4V2()            set detection level to 4.2V  falling / 4.4V  rising edge
+// PVD_isLow()              check if VDD is below detection level
 //
 // Interrupt (INT) functions available:
 // ------------------------------------
@@ -218,7 +232,7 @@ void CLK_reset(void);         // reset system clock to default state
 void MCO_init(void);                                    // init clock output to pin PC4
 
 // ===================================================================================
-// Delay Functions
+// Delay (DLY) Functions
 // ===================================================================================
 #define STK_init()        STK->CTLR = STK_CTLR_STE | STK_CTLR_STCLK // init SYSTICK @ F_CPU
 #define DLY_US_TIME       (F_CPU / 1000000)             // system ticks per us
@@ -228,7 +242,7 @@ void MCO_init(void);                                    // init clock output to 
 void DLY_ticks(uint32_t n);                             // delay n system ticks
 
 // ===================================================================================
-// Reset Functions
+// Reset (RST) Functions
 // ===================================================================================
 #define RST_now()         PFIC->CFGR    = PFIC_RESETSYS | PFIC_KEY3
 #define RST_clearFlags()  RCC->RSTSCKR |= RCC_RMVF
@@ -238,6 +252,11 @@ void DLY_ticks(uint32_t n);                             // delay n system ticks
 #define RST_wasSoftware() (RCC->RSTSCKR & RCC_SFTRSTF)
 #define RST_wasPower()    (RCC->RSTSCKR & RCC_PORRSTF)
 #define RST_wasPin()      (RCC->RSTSCKR & RCC_PINRSTF)
+
+// ===================================================================================
+// Bootloader (BOOT) Functions
+// ===================================================================================
+void BOOT_now(void);        // perform software reset and jump to bootloader
 
 // ===================================================================================
 // Independent Watchdog Timer (IWDG) Functions
@@ -289,6 +308,29 @@ void STDBY_WFE_now(void);   // put device into standby (deep sleep), wake up eve
 
 #define SLEEP_ms(n)           {AWU_start(n); SLEEP_WFE_now(); AWU_stop();}
 #define STDBY_ms(n)           {AWU_start(n); STDBY_WFE_now(); AWU_stop();}
+
+// ===================================================================================
+// Programmable Voltage Detector (PVD) Functions
+// ===================================================================================
+#define PVD_enable()          {RCC->APB1PCENR |= RCC_PWREN; PWR->CTLR |= PWR_CTLR_PVDE;}
+#define PVD_set_2V7()         PWR->CTLR &= ~PWR_CTLR_PLS
+#define PVD_set_2V9()         PWR->CTLR  = (PWR->CTLR & ~PWR_CTLR_PLS) | (0b001 << 5)
+#define PVD_set_3V15()        PWR->CTLR  = (PWR->CTLR & ~PWR_CTLR_PLS) | (0b010 << 5)
+#define PVD_set_3V3()         PWR->CTLR  = (PWR->CTLR & ~PWR_CTLR_PLS) | (0b011 << 5)
+#define PVD_set_3V5()         PWR->CTLR  = (PWR->CTLR & ~PWR_CTLR_PLS) | (0b100 << 5)
+#define PVD_set_3V7()         PWR->CTLR  = (PWR->CTLR & ~PWR_CTLR_PLS) | (0b101 << 5)
+#define PVD_set_3V9()         PWR->CTLR  = (PWR->CTLR & ~PWR_CTLR_PLS) | (0b110 << 5)
+#define PVD_set_4V2()         PWR->CTLR |=  PWR_CTLR_PLS
+#define PVD_isLow()           (PWR->CSR & PWR_CSR_PVDO)
+
+#define PVD_RT_enable()       EXTI->RTENR  |=  ((uint32_t)1 << 8)
+#define PVD_RT_disable()      EXTI->RTENR  &= ~((uint32_t)1 << 8)
+#define PVD_FT_enable()       EXTI->FTENR  |=  ((uint32_t)1 << 8)
+#define PVD_FT_disable()      EXTI->FTENR  &= ~((uint32_t)1 << 8)
+#define PVD_EV_enable()       EXTI->EVENR  |=  ((uint32_t)1 << 8)
+#define PVD_EV_disable()      EXTI->EVENR  &= ~((uint32_t)1 << 8)
+#define PVD_INT_enable()      EXTI->INTENR |=  ((uint32_t)1 << 8)
+#define PVD_INT_disable()     EXTI->INTENR &= ~((uint32_t)1 << 8)
 
 // ===================================================================================
 // Interrupt (INT) Functions
