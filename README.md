@@ -13,6 +13,15 @@ Mini Game Console utilizing the CH32V003J4M6 ultra-cheap (10 cents by the time o
 ## The CH32V003 Family of 32-bit RISC-V Microcontrollers
 The CH32V003 series is a collection of industrial-grade general-purpose microcontrollers that utilize the QingKe RISC-V2A core design supporting the RV32EC instruction set. These microcontrollers are equipped with various features such as a 48MHz system main frequency, 16KB flash, 2KB SRAM, wide voltage support, a single-wire serial debug interface, low power consumption, and an ultra-small package. Additionally, the CH32V003 series includes a built-in set of components including a DMA controller, a 10-bit ADC, op-amp comparators, multiple timers, and standard communication interfaces such as USART, I2C, and SPI.
 
+## SSD1306 OLED Display Module
+A low-cost SSD1306 4-pin I2C 128x64 pixels 0.96-inch OLED module is used as the display device. Make sure to acquire one with the correct pinout!
+
+## Buzzer Circuit
+Version 1.0 of the board controls the buzzer via a transistor. This increases the volume but can cause a voltage drop with weaker CR2032 3V batteries, potentially leading to a microcontroller brownout (this does not happen with the rechargeable LIR2032 3.6V batteries). Version 1.1 controls the buzzer directly through a low resistor, resulting in lower volume but preventing the brownout.
+
+## Power Consumption
+The average current consumption of the Mini Game Console is about 10mA at 3.6V, as measured with the [Power Profiler Kit II](https://www.nordicsemi.com/Products/Development-hardware/Power-Profiler-Kit-2).
+
 # Games
 ## Tiny Invaders
 Tiny Invaders was originally developed by [Daniel Champagne](https://www.tinyjoypad.com/) for the ATtiny85. It is an adaptation of the classic game Space Invaders. The player controls a laser cannon that moves horizontally along the bottom of the screen. The objective is to defend the Earth from waves of descending alien invaders. The aliens move side to side, gradually descending towards the player, and the player's goal is to destroy them before they reach the bottom of the screen.
@@ -89,7 +98,7 @@ sudo apt install python3 python3-pip
 python3 -m pip install pyusb
 ```
 
-Switch off the Game Console or remove the battery. Connect the Console via the 3-pin PROG header to the programming device. Open a terminal and navigate to the folder with the makefile. Run the following command to compile and upload:
+Switch off the Game Console or remove the battery. Connect the Console via the 3-pin PROG header to the programming device. Open a terminal and navigate to the folder with the *makefile*. Run the following command to compile and upload:
 ```
 make flash
 ```
