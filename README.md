@@ -11,7 +11,7 @@ Mini Game Console utilizing the CH32V003J4M6 ultra-cheap (10 cents by the time o
 ![GameConsole_wiring.png](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_wiring.png)
 
 ## The CH32V003 Family of 32-bit RISC-V Microcontrollers
-The CH32V003 series is a collection of industrial-grade general-purpose microcontrollers that utilize the QingKe RISC-V2A core design supporting the RV32EC instruction set. These microcontrollers are equipped with various features such as a 48MHz system main frequency, 16KB flash, 2KB SRAM, wide voltage support, a single-wire serial debug interface, low power consumption, and an ultra-small package. Additionally, the CH32V003 series includes a built-in set of components including a DMA controller, a 10-bit ADC, op-amp comparators, multiple timers, and standard communication interfaces such as USART, I2C, and SPI.
+The CH32V003 series is a collection of industrial-grade general-purpose microcontrollers that utilize the QingKe RISC-V2A core design supporting the RV32EC instruction set. These microcontrollers are equipped with various features such as a 48MHz system main frequency, 16KB flash, 2KB SRAM, 2.7V - 5.5V supply voltage support, a single-wire serial debug interface, low power consumption, and an ultra-small package. Additionally, the CH32V003 series includes a built-in set of components including a DMA controller, a 10-bit ADC, op-amp comparators, multiple timers, and standard communication interfaces such as USART, I2C, and SPI.
 
 ## OLED Display
 A low-cost SSD1306 4-pin I2C 128x64 pixels 0.96-inch OLED module is used as the display device. Make sure to acquire one with the correct pinout!
@@ -81,12 +81,12 @@ WCH-LinkE     GameConsole
 +-------+      +-------+
 |  SWDIO| <--> |DIO    |
 |    GND| ---> |GND    |
-|    3V3| ---> |3V3    |
+|    3V3| ---> |VCC    |
 +-------+      +-------+
 ```
 
 If the blue LED on the WCH-LinkE remains illuminated once it is connected to the USB port, it means that the device is currently in ARM mode and must be switched to RISC-V mode initially. There are a few ways to accomplish this:
-- You can utilize the Python tool *rvprog.py* (with *-v* option), which is provided with the firmware in the *tools* folder.
+- You can utilize the Python command-line tool [rvprog](https://pypi.org/project/rvprog/) (with *-v* option).
 - Alternatively, you can select "WCH-LinkRV" in the software provided by WCH, such as MounRiver Studio or WCH-LinkUtility.
 - Another option is to hold down the ModeS button on the device while plugging it into the USB port.
 
@@ -94,11 +94,11 @@ More information can be found in the [WCH-Link User Manual](http://www.wch-ic.co
 
 ## Compiling and Uploading Firmware using the Makefile
 ### Linux
-Install the toolchain (GCC compiler, Python3, and PyUSB):
+Install the toolchain (GCC compiler, Python3, and rvprog):
 ```
 sudo apt install build-essential libnewlib-dev gcc-riscv64-unknown-elf
 sudo apt install python3 python3-pip
-python3 -m pip install pyusb
+pip install rvprog
 ```
 
 Switch off the Game Console or remove the battery. Connect the Console via the 3-pin PROG header to the programming device. Open a terminal and navigate to the folder with the *makefile*. Run the following command to compile and upload:
@@ -108,11 +108,11 @@ make flash
 
 If you want to just upload the pre-compiled binary, run the following command instead:
 ```
-python3 tools/rvprog.py -f bin/<firmware>.bin
+rvprog -f bin/<firmware>.bin
 ```
 
 ### Other Operating Systems
-Follow the instructions on [CNLohr's ch32v003fun page](https://github.com/cnlohr/ch32v003fun/wiki/Installation) to set up the toolchain on your respective operating system (for Windows, use WSL). Also, install [Python3](https://www.pythontutorial.net/getting-started/install-python/) and [pyusb](https://github.com/pyusb/pyusb). Compile and upload with "make flash". Note that I only have Debian-based Linux and have not tested it on other operating systems.
+Follow the instructions on [CNLohr's ch32v003fun page](https://github.com/cnlohr/ch32v003fun/wiki/Installation) to set up the toolchain on your respective operating system (for Windows, use WSL). Also, install [Python3](https://www.pythontutorial.net/getting-started/install-python/) and [rvprog](https://pypi.org/project/rvprog/). Compile and upload with "make flash". Note that I only have Debian-based Linux and have not tested it on other operating systems.
 
 ## Compiling and Uploading Firmware using PlatformIO
 - Install [PlatformIO](https://platformio.org) and [platform-ch32v](https://github.com/Community-PIO-CH32V/platform-ch32v). Follow [these instructions](https://pio-ch32v.readthedocs.io/en/latest/installation.html) to do so. Linux/Mac users may also need to install [pyenv](https://realpython.com/intro-to-pyenv).
@@ -122,11 +122,11 @@ Follow the instructions on [CNLohr's ch32v003fun page](https://github.com/cnlohr
 ## Uploading pre-compiled Firmware Binary
 WCH offers the free but closed-source software [WCH-LinkUtility](https://www.wch.cn/downloads/WCH-LinkUtility_ZIP.html) to upload the precompiled hex-file with Windows. Select the "WCH-LinkRV" mode in the software, open the *<firmware>.hex* file in the *bin* folder and upload it to the microcontroller.
 
-Alternatively, there is a platform-independent open-source tool called minichlink developed by Charles Lohr (CNLohr), which can be found [here](https://github.com/cnlohr/ch32v003fun/tree/master/minichlink). It can be used with Windows, Linux and Mac.
+Alternatively, there is an open-source tool called [minichlink](https://github.com/cnlohr/ch32v003fun/tree/master/minichlink) developed by Charles Lohr (CNLohr). It can be used with Windows, Linux and Mac.
 
-If you have installed [Python3](https://www.pythontutorial.net/getting-started/install-python/) and [pyusb](https://github.com/pyusb/pyusb) on your system, you can also use the included Python tool *rvprog.py*:
+If you have installed [Python3](https://www.pythontutorial.net/getting-started/install-python/) on your system, you can also use the platform-independent open-source command-line tool [rvprog](https://pypi.org/project/rvprog/) for uploading:
 ```
-python3 tools/rvprog.py -f bin/<firmware>.bin
+rvprog -f bin/<firmware>.bin
 ```
 
 # References, Links and Notes

@@ -9,7 +9,7 @@
 # Install toolchain:
 #   sudo apt install build-essential libnewlib-dev gcc-riscv64-unknown-elf
 #   sudo apt install python3 python3-pip
-#   python3 -m pip install pyusb
+#   pip install rvprog
 #
 # Provide access permission to WCH-LinkE programmer:
 #   echo 'SUBSYSTEM=="usb", ATTR{idVendor}=="1a86", ATTR{idProduct}=="8010", MODE="666"' | sudo tee /etc/udev/rules.d/99-WCH-LinkE.rules
@@ -24,7 +24,6 @@ TARGET   = tiny_conway
 INCLUDE  = include
 SOURCE   = src
 BIN      = bin
-TOOLS    = tools
 
 # Microcontroller Settings
 F_CPU    = 48000000
@@ -38,7 +37,7 @@ OBJCOPY  = $(PREFIX)-objcopy
 OBJDUMP  = $(PREFIX)-objdump
 OBJSIZE  = $(PREFIX)-size
 NEWLIB   = /usr/include/newlib
-ISPTOOL  = python3 $(TOOLS)/rvprog.py -f $(BIN)/$(TARGET).bin
+ISPTOOL  = rvprog -f $(BIN)/$(TARGET).bin
 CLEAN    = rm -f *.lst *.obj *.cof *.list *.map *.eep.hex *.o *.d
 
 # Compiler Flags
