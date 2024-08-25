@@ -22,6 +22,11 @@ Version 1.0 of the board controls the buzzer via a transistor. This increases th
 ## Power Consumption
 The average current consumption of the Mini Game Console is about 10mA at 3.6V, as measured with the [Power Profiler Kit II](https://www.nordicsemi.com/Products/Development-hardware/Power-Profiler-Kit-2).
 
+## Building Instructions
+1. Take the Gerber files (the *zip* file inside the *hardware* folder) and upload them to a PCB (printed circuit board) manufacturer of your choice (e.g., [JLCPCB](https://jlcpcb.com/)). They will use these files to create the circuit board for your device and send it to you.
+2. Once you have the PCB, you can start soldering the components onto it. Use the BOM (bill of materials) and schematic as a guide to make sure everything is connected correctly. You can find the corresponding files in the *hardware* folder.
+3. Upload the firmware by following the instructions in the section after next (see below).
+
 # Games
 ## Tiny Invaders
 Tiny Invaders was originally developed by [Daniel Champagne](https://www.tinyjoypad.com/) for the ATtiny85. It is an adaptation of the classic game Space Invaders. The player controls a laser cannon that moves horizontally along the bottom of the screen. The objective is to defend the Earth from waves of descending alien invaders. The aliens move side to side, gradually descending towards the player, and the player's goal is to destroy them before they reach the bottom of the screen.
@@ -104,11 +109,6 @@ pip install rvprog
 Switch off the Game Console or remove the battery. Connect the Console via the 3-pin PROG header to the programming device. Open a terminal and navigate to the folder with the *makefile*. Run the following command to compile and upload:
 ```
 make flash
-```
-
-If you want to just upload the pre-compiled binary, run the following command instead:
-```
-rvprog -f bin/<firmware>.bin
 ```
 
 ### Other Operating Systems
