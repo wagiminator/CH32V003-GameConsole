@@ -131,6 +131,8 @@ rvprog -f bin/<firmware>.bin
 
 # References, Links and Notes
 - [EasyEDA Design Files](https://oshwlab.com/wagiminator)
+- [MCU Templates](https://github.com/wagiminator/MCU-Templates)
+- [MCU Flash Tools](https://github.com/wagiminator/MCU-Flash-Tools)
 - [DanielC: Tinyjoypad](https://www.tinyjoypad.com/)
 - [CNLohr: ch32003fun](https://github.com/cnlohr/ch32v003fun)
 - [WCH: CH32V003 datasheets](http://www.wch-ic.com/products/CH32V003.html)
