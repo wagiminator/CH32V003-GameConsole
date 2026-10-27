@@ -64,6 +64,42 @@ Tiny Pacman was originally developed by [Daniel Champagne](https://www.tinyjoypa
 ![GameConsole_pacman_1.png](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_pacman_1.png)
 ![GameConsole_pacman_3.png](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_pacman_3.png)
 
+## Tiny Doom
+Can it play Doom? Oh yes, it can! Tiny Doom is a small Doom-like first person shooter. Fight your way through three levels full of zombies, demons and a cacodemon, open the doors, pick up medkits and ammo, and find the blinking exit switch of each level.
+
+![GameConsole_doom_1.png](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_doom_1.png)
+![GameConsole_doom_3.png](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_doom_3.png)
+
+## Tiny Boulder
+Tiny Boulder is a small Boulder Dash-like digging game. Dig your way through six scrolling caves, collect the required number of diamonds before the time runs out and escape through the exit. Watch out for falling boulders, fireflies and butterflies.
+
+![GameConsole_boulder_1.png](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_boulder_1.png)
+![GameConsole_boulder_2.png](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_boulder_2.png)
+
+## Tiny Bubble
+Tiny Bubble is a small Bubble Bobble-like platform game. You are a little dragon who blows bubbles. Catch the monsters in bubbles, then burst the bubbles to defeat them and collect the fruit they leave behind. Clear all monsters to reach the next round, but hurry: after a while the monsters get angry, and then the invincible skull comes for you.
+
+![GameConsole_bubble_1.png](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_bubble_1.png)
+![GameConsole_bubble_2.png](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_bubble_2.png)
+
+## Tiny Karate
+Tiny Karate is a small International Karate-like fighting game. You (white) fight against the computer (black) in front of a mountain and a pagoda. Score points with punches and kicks, block or dodge the attacks of your opponent and earn a new belt with every won bout.
+
+![GameConsole_karate_1.png](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_karate_1.png)
+![GameConsole_karate_2.png](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_karate_2.png)
+
+## Tiny Run
+Tiny Run is a small Out Run-like racing game. Race your convertible along the coast, through the desert, the mountains and the city. Reach the checkpoint at the end of each stage before the time runs out. At each checkpoint the road forks, and the road you take decides the next stage. Five stages in a row bring you to the goal.
+
+![GameConsole_run_1.png](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_run_1.png)
+![GameConsole_run_3.png](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_run_3.png)
+
+## Tiny Shooter
+Tiny Shooter is a small horizontally scrolling shoot'em up game. Fly through open space, over hills and through narrow caves, shoot down waves of enemies, collect power capsules for a stronger gun and defeat the guardian at the end of each stage. Every stage is faster and more crowded than the one before.
+
+![GameConsole_shooter_1.png](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_shooter_1.png)
+![GameConsole_shooter_3.png](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_shooter_3.png)
+
 # Compiling and Uploading Firmware
 ## Programming and Debugging Device
 To program the CH32V003 microcontroller, you will need a special programming device which utilizes the proprietary single-wire serial debug interface (SDI). The [WCH-LinkE](http://www.wch-ic.com/products/WCH-Link.html) (pay attention to the "E" in the name) is a suitable device for this purpose and can be purchased commercially for around $4. This debugging tool is not only compatible with the CH32V003 but also with other WCH RISC-V and ARM-based microcontrollers.
