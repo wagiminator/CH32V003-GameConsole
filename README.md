@@ -133,6 +133,9 @@ If the blue LED on the WCH-LinkE remains illuminated once it is connected to the
 
 More information can be found in the [WCH-Link User Manual](http://www.wch-ic.com/downloads/WCH-LinkUserManual_PDF.html).
 
+## Uploading a Game using the Web App
+The easiest way to upload a game to the GameConsole is by using the [Web App](https://wagiminator.github.io/apps/gameconsole/). This only works in Chrome, Edge, or Opera browsers on a desktop PC. The prerequisites mentioned above regarding drivers or udev rules must be met.
+
 ## Compiling and Uploading Firmware using the Makefile
 ### Linux
 Install the toolchain (GCC compiler, Python3, and rvprog):
