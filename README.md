@@ -169,6 +169,7 @@ rvprog -f bin/<firmware>.bin
 ```
 
 # References, Links and Notes
+- [Game Console Flasher Web App](https://wagiminator.github.io/apps/gameconsole/)
 - [EasyEDA Design Files](https://oshwlab.com/wagiminator)
 - [MCU Templates](https://github.com/wagiminator/MCU-Templates)
 - [MCU Flash Tools](https://github.com/wagiminator/MCU-Flash-Tools)
