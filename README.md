@@ -168,6 +168,9 @@ If you have installed [Python3](https://www.pythontutorial.net/getting-started/i
 rvprog -f bin/<firmware>.bin
 ```
 
+## Browser-based Simulation
+If you want to play the games in your web-browser, then take a look [here](https://v86-riscv.turret13.workers.dev/?build=gameconsole-tris).
+
 # References, Links and Notes
 - [Game Console Flasher Web App](https://wagiminator.github.io/apps/gameconsole/)
 - [EasyEDA Design Files](https://oshwlab.com/wagiminator)
@@ -178,6 +181,7 @@ rvprog -f bin/<firmware>.bin
 - [WCH: CH32V003 datasheets](http://www.wch-ic.com/products/CH32V003.html)
 - [WCH: WCH-Link user manual](http://www.wch-ic.com/downloads/WCH-LinkUserManual_PDF.html)
 - [WCH: Official Store on AliExpress](https://wchofficialstore.aliexpress.com)
+- [Browser Emulation](https://v86-riscv.turret13.workers.dev/?build=gameconsole-tris)
 
 ![GameConsole_pic2.jpg](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_pic2.jpg)
 
