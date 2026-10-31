@@ -25,11 +25,11 @@ Recommended settings: 0.2 mm layer height (0.1-0.15 mm for the buttons looks nic
 1. Put the D-pad and the fire button into their holes from the inside of the top part (front plate down on the table).
 2. Put the PCB with the OLED facing down into the top part. The three corner pillars of the top part rest on the PCB around the mounting holes.
 3. Put the bottom part on. Its inner rim fits into the step of the top part's wall.
-4. Fasten everything with three **M2 x 12 (or x 14) countersunk screws** from the back. The screws cut their own thread into the 1.6 mm holes of the top part's pillars. Don't over-tighten them.
+4. Fasten everything with three **M2 x 12 countersunk screws** from the back. The screws cut their own thread into the 1.6 mm holes of the top part's pillars. Don't over-tighten them.
 
 ## Dimensions
-- Outside dimensions: 39.8 x 55.0 x 18.0 mm (top part 10.6 mm, bottom part 8.4 mm, of which 1.0 mm is the joint).
-- Space above the PCB: 7.4 mm (OLED module about 6 to 6.6 mm, tact switches 6 mm).
+- Outside dimensions: 39.8 x 55.0 x 16.0 mm (top part 8.6 mm, bottom part 8.4 mm, of which 1.0 mm is the joint).
+- Space above the PCB: 5.4 mm (OLED glass about 5 mm, 6x6 mm tact switches 4 mm high). For other switch heights change `PLUNGER` in the script: the ceiling, the buttons and the pivot of the D-pad follow it.
 - Space below the PCB: 6.2 mm (battery holder CR2032-BS-6-1: 5.5 mm).
 - The buttons stand 1.4 mm out of the front.
 

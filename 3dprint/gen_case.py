@@ -36,9 +36,12 @@ BATT_C  = (17.78, 35.56)                                     # CR2032 holder (bo
 # -----------------------------------------------------------------------------------
 GAP     = 0.5           # PCB edge to inner wall
 WALL    = 1.6
-TOP_IN  = 7.4           # inner ceiling of the top shell above the PCB
+PLUNGER = 4.3           # top of the tact switch plungers (6x6 mm switches, 4 mm high)
+CAP_BOT = PLUNGER + 0.15  # underside of the button caps at rest
+TOP_IN  = CAP_BOT + 1.25  # inner ceiling of the top shell above the PCB (room for the cap collars)
 TOP_T   = 1.6           # thickness of the front plate
 TOP_Z   = TOP_IN + TOP_T
+OLED_TOP = 5.0          # top of the OLED glass above the PCB (measured: about 5 mm)
 BOT_IN  = 6.2           # free space below the PCB (battery holder: 5.5 mm)
 BOT_T   = 1.2
 BOT_Z   = -PCB_T - BOT_IN - BOT_T
@@ -46,8 +49,6 @@ JOINT_Z = -0.6          # overlap of the two shells (rabbet joint) from -PCB_T u
 EDGE    = 0.8           # chamfer of the outer edges
 WIN     = (5.28, 30.28, 5.3, 19.3)   # OLED window (x0, x1, y0, y1)
 CAP_CL  = 0.3           # clearance of the button caps in their holes
-PLUNGER = 6.0           # top of the tact switch plungers (6x6x6 mm)
-CAP_BOT = PLUNGER + 0.15
 CAP_TOP = TOP_Z + 1.4   # buttons stand out 1.4 mm
 
 CX, CY = PCB_W / 2, PCB_H / 2
@@ -115,6 +116,9 @@ def top_shell(x, y, z):
     s = union(s, cut(pil, -outline(x, y, GAP + 0.01)))      # stay inside the walls
     for h in HOLES:                                          # M2 screws (self tapping)
         s = cut(s, slab(circle(x, y, h, 0.8), z, -5, TOP_IN - 0.8))
+    # pocket above the OLED module, its glass is higher than the ceiling
+    if OLED_TOP + 0.2 > TOP_IN:
+        s = cut(s, slab(rrect(x, y, OLED_X0 - 0.3, OLED_X1 + 0.3, OLED_Y0 - 0.3, OLED_Y1 + 0.3, 0.8), z, TOP_IN - 0.5, OLED_TOP + 0.2))
     # OLED window with a 45 degree chamfer on the outside
     g = np.clip(z - (TOP_Z - 1.2), 0, 2)
     s = cut(s, slab(rrect(x, y, WIN[0] - g, WIN[1] + g, WIN[2] - g, WIN[3] + g, 1.0 + g), z, TOP_IN - 1, TOP_Z + 1))
@@ -168,7 +172,7 @@ def cap(d2fun, x, y, z, nub=None):
     top = slab(d2fun(x, y, 0) + np.clip(z - (CAP_TOP - 0.5), 0, 0.5), z, CAP_BOT, CAP_TOP)
     s = np.maximum(body, np.where(z > CAP_TOP - 1, top, -1e3))
     if nub is not None:                                      # pivot of the D-pad
-        s = union(s, slab(circle(x, y, nub, 1.4), z, 0.25, CAP_BOT + 0.5))
+        s = union(s, slab(circle(x, y, nub, 1.4), z, 0.4, CAP_BOT + 0.5))
     return s
 
 def dpad(x, y, z):
@@ -183,11 +187,11 @@ def fire(x, y, z):
 def boxes():
     b = []
     for k, (x, y) in BTN.items():
-        b.append(('switch ' + k, (x - 3, x + 3, y - 3, y + 3, 0, 3.5)))
+        b.append(('switch ' + k, (x - 3, x + 3, y - 3, y + 3, 0, PLUNGER - 0.8)))
         b.append(('plunger ' + k, (x - 1.75, x + 1.75, y - 1.75, y + 1.75, 0, PLUNGER)))
         if k == 'ACT': b.append(('legs ' + k, (x - 2.6, x + 2.6, y - 4.75, y + 4.75, 0, 0.5)))
         else:          b.append(('legs ' + k, (x - 4.75, x + 4.75, y - 2.6, y + 2.6, 0, 0.5)))
-    b.append(('OLED module', (OLED_X0, OLED_X1, OLED_Y0, OLED_Y1, 2.4, 6.0)))
+    b.append(('OLED module', (OLED_X0, OLED_X1, OLED_Y0, OLED_Y1, 2.4, OLED_TOP)))
     b.append(('OLED header', (12.6, 23.0, 0.6, 3.2, 0, 2.5)))
     b.append(('buzzer', (BUZZER[0] - 2.5, BUZZER[0] + 2.5, BUZZER[1] - 2.5, BUZZER[1] + 2.5, 0, 3.0)))
     b.append(('power switch', (0, 4.2, SWITCH_Y - 3.7, SWITCH_Y + 3.7, 0, 1.6)))
