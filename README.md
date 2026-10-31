@@ -136,6 +136,8 @@ More information can be found in the [WCH-Link User Manual](http://www.wch-ic.co
 ## Uploading a Game using the Web App
 The easiest way to upload a game to the GameConsole is by using the [Web App](https://wagiminator.github.io/apps/gameconsole/). This only works in Chrome, Edge, or Opera browsers on a desktop PC. The prerequisites mentioned above regarding drivers or udev rules must be met.
 
+![GameConsole_webapp.png](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_webapp.png)
+
 ## Compiling and Uploading Firmware using the Makefile
 ### Linux
 Install the toolchain (GCC compiler, Python3, and rvprog):
@@ -170,6 +172,8 @@ rvprog -f bin/<firmware>.bin
 
 ## Browser-based Simulation
 If you want to play the games in your web-browser, then take a look [here](https://v86-riscv.turret13.workers.dev/?build=gameconsole-tris).
+
+![GameConsole_emulation.png](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_emulation.png)
 
 # References, Links and Notes
 - [Game Console Flasher Web App](https://wagiminator.github.io/apps/gameconsole/)
