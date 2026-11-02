@@ -27,6 +27,15 @@ The average current consumption of the Mini Game Console is about 10mA at 3.6V, 
 2. Once you have the PCB, you can start soldering the components onto it. Use the BOM (bill of materials) and schematic as a guide to make sure everything is connected correctly. You can find the corresponding files in the *hardware* folder.
 3. Upload the firmware by following the instructions in the section after next (see below).
 
+## 3D Printable Case
+1. Print the stl-files in the *3dprint* folder with your FDM Printer. Recommended settings: 0.2 mm layer height (0.1-0.15 mm for the buttons looks nicer), 3 perimeters, 20 % infill, PLA or PETG.
+2. Put the D-pad and the fire button into their holes from the inside of the top part (front plate down on the table).
+3. Put the PCB with the OLED facing down into the top part. The three corner pillars of the top part rest on the PCB around the mounting holes.
+4. Put the bottom part on. Its inner rim fits into the step of the top part's wall.
+5. Fasten everything with three **M2 x 12 countersunk screws** from the back. The screws cut their own thread into the 1.6 mm holes of the top part's pillars. Don't over-tighten them.
+
+![case_preview.png](3dprint/case_preview.png)
+
 # Games
 ## Tiny Invaders
 Tiny Invaders was originally developed by [Daniel Champagne](https://www.tinyjoypad.com/) for the ATtiny85. It is an adaptation of the classic game Space Invaders. The player controls a laser cannon that moves horizontally along the bottom of the screen. The objective is to defend the Earth from waves of descending alien invaders. The aliens move side to side, gradually descending towards the player, and the player's goal is to destroy them before they reach the bottom of the screen.
@@ -170,7 +179,7 @@ If you have installed [Python3](https://www.pythontutorial.net/getting-started/i
 rvprog -f bin/<firmware>.bin
 ```
 
-## Browser-based Simulation
+# Browser-based Simulation
 If you want to play the games in your web-browser, then take a look [here](https://v86-riscv.turret13.workers.dev/?build=gameconsole-tris).
 
 ![GameConsole_emulation.png](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_emulation.png)
