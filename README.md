@@ -4,11 +4,11 @@ Mini Game Console utilizing the CH32V003J4M6 ultra-cheap (10 cents by the time o
 - Project Video (YouTube): https://youtu.be/1W7Z0BodhWk
 - PCB Design Files (EasyEDA): https://oshwlab.com/wagiminator/ch32v003j4m6-game-console
 
-![GameConsole_pic1.jpg](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_pic1.jpg)
+![GameConsole_pic1.jpg](documentation/GameConsole_pic1.jpg)
 
 # Hardware
 ## Schematic
-![GameConsole_wiring.png](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_wiring.png)
+![GameConsole_wiring.png](documentation/GameConsole_wiring.png)
 
 ## The CH32V003 Family of 32-bit RISC-V Microcontrollers
 The CH32V003 series is a collection of industrial-grade general-purpose microcontrollers that utilize the QingKe RISC-V2A core design supporting the RV32EC instruction set. These microcontrollers are equipped with various features such as a 48MHz system main frequency, 16KB flash, 2KB SRAM, 2.7V - 5.5V supply voltage support, a single-wire serial debug interface, low power consumption, and an ultra-small package. Additionally, the CH32V003 series includes a built-in set of components including a DMA controller, a 10-bit ADC, op-amp comparators, multiple timers, and standard communication interfaces such as USART, I2C, and SPI.
@@ -42,72 +42,78 @@ Tiny Invaders was originally developed by [Daniel Champagne](https://www.tinyjoy
 
 The player can shoot projectiles at the aliens and must strategically time their shots to hit the moving targets. As the game progresses, the aliens' movement becomes faster, making it more challenging to eliminate them. Additionally, the aliens periodically fire back at the player, creating a sense of urgency and adding to the gameplay difficulty.
 
-![GameConsole_invaders_1.png](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_invaders_1.png)
-![GameConsole_invaders_2.png](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_invaders_2.png)
+![GameConsole_invaders_1.png](documentation/GameConsole_invaders_1.png)
+![GameConsole_invaders_2.png](documentation/GameConsole_invaders_2.png)
 
 ## Tiny Lander
 Tiny Lander was originally developed by [tscha70](https://github.com/tscha70/TinyLanderV1.0) for the ATtiny85. It is an adaptation of the classic game Lunar Lander that simulates the experience of piloting a spacecraft and landing it safely on the moon's surface. The objective of the game is to control the descent of the lunar lander module, adjusting the thrust and direction to ensure a smooth landing without crashing or running out of fuel. It requires careful maneuvering and precision to navigate the gravitational forces and terrain obstacles present on the moon.
 
-![GameConsole_lander_1.png](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_lander_1.png)
-![GameConsole_lander_2.png](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_lander_2.png)
+![GameConsole_lander_1.png](documentation/GameConsole_lander_1.png)
+![GameConsole_lander_2.png](documentation/GameConsole_lander_2.png)
 
 If you hold down the UP button on the start screen while pressing the fire button, the game will automatically start in a later level. On the other hand, if you hold down the DOWN button, you get 255 lives.
 
 ## Tiny Tris
 Tiny Tris was originally developed by [Daniel Champagne](https://www.tinyjoypad.com/) for the ATtiny85. It is an adaptation of the well-known game Tetris. The objective of Tetris is to manipulate and arrange the falling Tetriminos to create complete horizontal lines without any gaps. When a line is completed, it clears from the playfield, and the player earns points. As the game progresses, the Tetriminos fall faster, increasing the challenge. If the Tetriminos stack up and reach the top of the playfield, the game ends.
 
-![GameConsole_tris_1.png](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_tris_1.png)
-![GameConsole_tris_2.png](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_tris_2.png)
+![GameConsole_tris_1.png](documentation/GameConsole_tris_1.png)
+![GameConsole_tris_2.png](documentation/GameConsole_tris_2.png)
 
 ## Tiny Arkanoid
 Tiny Arkanoid was originally developed by [Daniel Champagne](https://www.tinyjoypad.com/) for the ATtiny85. It is an adaptation of the classic game Arkanoid. The player controls a paddle at the bottom of the screen and uses it to bounce a ball against a wall of bricks at the top.
 
 The objective of the game is to destroy all the bricks by hitting them with the ball. Each brick that is hit will disappear, and the player earns points for each brick destroyed. The ball bounces off the walls and the paddle, and the player must maneuver the paddle to keep the ball in play and prevent it from falling off the bottom of the screen.
 
-![GameConsole_arkanoid_1.png](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_arkanoid_1.png)
-![GameConsole_arkanoid_2.png](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_arkanoid_2.png)
+![GameConsole_arkanoid_1.png](documentation/GameConsole_arkanoid_1.png)
+![GameConsole_arkanoid_2.png](documentation/GameConsole_arkanoid_2.png)
 
 ## Tiny Pacman
 Tiny Pacman was originally developed by [Daniel Champagne](https://www.tinyjoypad.com/) for the ATtiny85. The player controls a round character called Pacman, who must navigate through a maze filled with pellets and various types of enemies, known as ghosts. The objective of the game is for Pacman to eat all the pellets in the maze while avoiding the ghosts.
 
-![GameConsole_pacman_1.png](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_pacman_1.png)
-![GameConsole_pacman_3.png](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_pacman_3.png)
+![GameConsole_pacman_1.png](documentation/GameConsole_pacman_1.png)
+![GameConsole_pacman_3.png](documentation/GameConsole_pacman_3.png)
 
 ## Tiny Doom
 Can it play Doom? Oh yes, it can! Tiny Doom is a small Doom-like first person shooter. Fight your way through three levels full of zombies, demons and a cacodemon, open the doors, pick up medkits and ammo, and find the blinking exit switch of each level.
 
-![GameConsole_doom_1.png](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_doom_1.png)
-![GameConsole_doom_3.png](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_doom_3.png)
+![GameConsole_doom_1.png](documentation/GameConsole_doom_1.png)
+![GameConsole_doom_3.png](documentation/GameConsole_doom_3.png)
 
 ## Tiny Boulder
 Tiny Boulder is a small Boulder Dash-like digging game. Dig your way through six scrolling caves, collect the required number of diamonds before the time runs out and escape through the exit. Watch out for falling boulders, fireflies and butterflies.
 
-![GameConsole_boulder_1.png](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_boulder_1.png)
-![GameConsole_boulder_2.png](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_boulder_2.png)
+![GameConsole_boulder_1.png](documentation/GameConsole_boulder_1.png)
+![GameConsole_boulder_2.png](documentation/GameConsole_boulder_2.png)
 
 ## Tiny Bubble
 Tiny Bubble is a small Bubble Bobble-like platform game. You are a little dragon who blows bubbles. Catch the monsters in bubbles, then burst the bubbles to defeat them and collect the fruit they leave behind. Clear all monsters to reach the next round, but hurry: after a while the monsters get angry, and then the invincible skull comes for you.
 
-![GameConsole_bubble_1.png](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_bubble_1.png)
-![GameConsole_bubble_2.png](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_bubble_2.png)
+![GameConsole_bubble_1.png](documentation/GameConsole_bubble_1.png)
+![GameConsole_bubble_2.png](documentation/GameConsole_bubble_2.png)
 
 ## Tiny Karate
 Tiny Karate is a small International Karate-like fighting game. You (white) fight against the computer (black) in front of a mountain and a pagoda. Score points with punches and kicks, block or dodge the attacks of your opponent and earn a new belt with every won bout.
 
-![GameConsole_karate_1.png](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_karate_1.png)
-![GameConsole_karate_2.png](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_karate_2.png)
+![GameConsole_karate_1.png](documentation/GameConsole_karate_1.png)
+![GameConsole_karate_2.png](documentation/GameConsole_karate_2.png)
 
 ## Tiny Run
 Tiny Run is a small Out Run-like racing game. Race your convertible along the coast, through the desert, the mountains and the city. Reach the checkpoint at the end of each stage before the time runs out. At each checkpoint the road forks, and the road you take decides the next stage. Five stages in a row bring you to the goal.
 
-![GameConsole_run_1.png](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_run_1.png)
-![GameConsole_run_3.png](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_run_3.png)
+![GameConsole_run_1.png](documentation/GameConsole_run_1.png)
+![GameConsole_run_3.png](documentation/GameConsole_run_3.png)
 
 ## Tiny Shooter
 Tiny Shooter is a small horizontally scrolling shoot'em up game. Fly through open space, over hills and through narrow caves, shoot down waves of enemies, collect power capsules for a stronger gun and defeat the guardian at the end of each stage. Every stage is faster and more crowded than the one before.
 
-![GameConsole_shooter_1.png](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_shooter_1.png)
-![GameConsole_shooter_3.png](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_shooter_3.png)
+![GameConsole_shooter_1.png](documentation/GameConsole_shooter_1.png)
+![GameConsole_shooter_3.png](documentation/GameConsole_shooter_3.png)
+
+## Tiny RPG
+A small open-world action RPG developed by [Sergey Smirnov](https://github.com/fatalists/CH32V003-TinyRPG). The game is inspired by the Dark Souls series, Elden Ring, Ragnarok Online and Dota 2. Defeat Malenia, who waits at the far end of Valhalla, north of the snowfield. She is by far the strongest creature in the world. Two other bosses guard caves in the desert and the snowfield. They are optional, but the gear they drop makes the road to Malenia a lot shorter.
+
+![GameConsole_rpg_1.png](documentation/GameConsole_rpg_1.png)
+![GameConsole_rpg_2.png](documentation/GameConsole_rpg_2.png)
 
 # Compiling and Uploading Firmware
 ## Programming and Debugging Device
