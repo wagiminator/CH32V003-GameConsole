@@ -109,6 +109,12 @@ Tiny Shooter is a small horizontally scrolling shoot'em up game. Fly through ope
 ![GameConsole_shooter_1.png](documentation/GameConsole_shooter_1.png)
 ![GameConsole_shooter_3.png](documentation/GameConsole_shooter_3.png)
 
+## Tiny Sisters
+Tiny Sisters is a small Giana Sisters/Super Mario Bros-like jump'n'run game. Run and jump through sixteen scrolling levels: meadows, hills, caves, lakes, forests, the sky and castles. Jump on owls, beetles, frogs, bees and fish, but beware of the spiky hedgehogs. Bump your head against the bonus blocks to get diamonds. The magic wheel turns the sister into a punk who can smash bricks, the dream orb lets her throw bouncing dream bubbles. Reach the exit gate of each level before the time runs out, and defeat the owl king at the end of each castle.
+
+![GameConsole_sisters_1.png](documentation/GameConsole_sisters_1.png)
+![GameConsole_sisters_3.png](documentation/GameConsole_sisters_3.png)
+
 ## Tiny RPG
 A small open-world action RPG developed by [Sergey Smirnov](https://github.com/fatalists/CH32V003-TinyRPG). The game is inspired by the Dark Souls series, Elden Ring, Ragnarok Online and Dota 2. Defeat Malenia, who waits at the far end of Valhalla, north of the snowfield. She is by far the strongest creature in the world. Two other bosses guard caves in the desert and the snowfield. They are optional, but the gear they drop makes the road to Malenia a lot shorter.
 
