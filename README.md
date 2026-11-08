@@ -115,6 +115,12 @@ Tiny Sisters is a small Giana Sisters/Super Mario Bros-like jump'n'run game. Run
 ![GameConsole_sisters_1.png](documentation/GameConsole_sisters_1.png)
 ![GameConsole_sisters_3.png](documentation/GameConsole_sisters_3.png)
 
+## Tiny Blaster
+Tiny Blaster is a small vertically scrolling shoot'em up in the style of Xenon II: Megablast. Fly through five stages with canyons and rock walls and fight drones, weavers, divers, chasers, wall turrets, spinners, asteroids and capsule pods, and finally the big guardian at the end of each stage. Collect the credit bubbles of destroyed enemies and spend them in the weapon shop before each stage: gun power-ups, side shots, rear shots, homing missiles, laser, cannon, wing drones, the orbiting electro ball, speed-ups, autofire, energy refill, extra lives and the mighty Nashwan power, which gives you all weapons for a short time. Capsules dropped by pods contain weapons, energy or Nashwan power as well. After the fifth stage, the game starts over with tougher enemies.
+
+![GameConsole_blaster_2.png](documentation/GameConsole_blaster_2.png)
+![GameConsole_blaster_3.png](documentation/GameConsole_blaster_3.png)
+
 ## Tiny RPG
 A small open-world action RPG developed by [Sergey Smirnov](https://github.com/fatalists/CH32V003-TinyRPG). The game is inspired by the Dark Souls series, Elden Ring, Ragnarok Online and Dota 2. Defeat Malenia, who waits at the far end of Valhalla, north of the snowfield. She is by far the strongest creature in the world. Two other bosses guard caves in the desert and the snowfield. They are optional, but the gear they drop makes the road to Malenia a lot shorter.
 
