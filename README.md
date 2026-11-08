@@ -118,8 +118,14 @@ Tiny Sisters is a small Giana Sisters/Super Mario Bros-like jump'n'run game. Run
 ## Tiny Blaster
 Tiny Blaster is a small vertically scrolling shoot'em up in the style of Xenon II: Megablast. Fly through five stages with canyons and rock walls and fight drones, weavers, divers, chasers, wall turrets, spinners, asteroids and capsule pods, and finally the big guardian at the end of each stage. Collect the credit bubbles of destroyed enemies and spend them in the weapon shop before each stage: gun power-ups, side shots, rear shots, homing missiles, laser, cannon, wing drones, the orbiting electro ball, speed-ups, autofire, energy refill, extra lives and the mighty Nashwan power, which gives you all weapons for a short time. Capsules dropped by pods contain weapons, energy or Nashwan power as well. After the fifth stage, the game starts over with tougher enemies.
 
+![GameConsole_blaster_1.png](documentation/GameConsole_blaster_1.png)
 ![GameConsole_blaster_2.png](documentation/GameConsole_blaster_2.png)
-![GameConsole_blaster_3.png](documentation/GameConsole_blaster_3.png)
+
+## Tiny Hurrican
+Tiny Hurrican is a small run'n'gun game in the style of Turrican. Explore six large levels in three worlds - caves, a technical base and an alien hive - that scroll in all directions. Fight walkers, hoppers, soldiers, flyers, droppers, homing eyes, wall turrets, generators and giant walkers, and defeat the guardian at the end of each world. Shoot the power blocks to get the multiple shot, the laser or the rebound shot (each with three power levels), energy, a shield, extra lives, power lines and gyroscope wheels. Hold the fire button to use the rotatable lightning beam, roll through narrow tunnels as a gyroscope wheel and release the power lines to clear the screen. Invisible blocks, breakable walls and hidden tunnels lead to secret rooms full of diamonds. Reach the exit before the time runs out.
+
+![GameConsole_hurrican_1.png](documentation/GameConsole_hurrican_1.png)
+![GameConsole_hurrican_2.png](documentation/GameConsole_hurrican_2.png)
 
 ## Tiny RPG
 A small open-world action RPG developed by [Sergey Smirnov](https://github.com/fatalists/CH32V003-TinyRPG). The game is inspired by the Dark Souls series, Elden Ring, Ragnarok Online and Dota 2. Defeat Malenia, who waits at the far end of Valhalla, north of the snowfield. She is by far the strongest creature in the world. Two other bosses guard caves in the desert and the snowfield. They are optional, but the gear they drop makes the road to Malenia a lot shorter.
@@ -131,7 +137,7 @@ A small open-world action RPG developed by [Sergey Smirnov](https://github.com/f
 ## Programming and Debugging Device
 To program the CH32V003 microcontroller, you will need a special programming device which utilizes the proprietary single-wire serial debug interface (SDI). The [WCH-LinkE](http://www.wch-ic.com/products/WCH-Link.html) (pay attention to the "E" in the name) is a suitable device for this purpose and can be purchased commercially for around $4. This debugging tool is not only compatible with the CH32V003 but also with other WCH RISC-V and ARM-based microcontrollers.
 
-![CH32V003_wch-linke.jpg](https://raw.githubusercontent.com/wagiminator/Development-Boards/main/CH32V003F4P6_DevBoard/documentation/CH32V003_wch-linke.jpg)
+![CH32V003_wch-linke.jpg](documentation/CH32V003_wch-linke.jpg)
 
 To use the WCH-LinkE on Linux, you need to grant access permissions beforehand by executing the following commands:
 ```
@@ -163,7 +169,7 @@ More information can be found in the [WCH-Link User Manual](http://www.wch-ic.co
 ## Uploading a Game using the Web App
 The easiest way to upload a game to the GameConsole is by using the [Web App](https://wagiminator.github.io/apps/gameconsole/). This only works in Chrome, Edge, or Opera browsers on a desktop PC. The prerequisites mentioned above regarding drivers or udev rules must be met.
 
-![GameConsole_webapp.png](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_webapp.png)
+![GameConsole_webapp.png](documentation/GameConsole_webapp.png)
 
 ## Compiling and Uploading Firmware using the Makefile
 ### Linux
@@ -200,7 +206,7 @@ rvprog -f bin/<firmware>.bin
 # Browser-based Simulation
 If you want to play the games in your web-browser, then take a look [here](https://v86-riscv.turret13.workers.dev/?build=gameconsole-tris).
 
-![GameConsole_emulation.png](https://raw.githubusercontent.com/wagiminator/CH32V003-GameConsole/main/documentation/GameConsole_emulation.png)
+![GameConsole_emulation.png](documentation/GameConsole_emulation.png)
 
 # References, Links and Notes
 - [Game Console Flasher Web App](https://wagiminator.github.io/apps/gameconsole/)
