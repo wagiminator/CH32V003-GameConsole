@@ -137,7 +137,7 @@ A small open-world action RPG developed by [Sergey Smirnov](https://github.com/f
 ## Programming and Debugging Device
 To program the CH32V003 microcontroller, you will need a special programming device which utilizes the proprietary single-wire serial debug interface (SDI). The [WCH-LinkE](http://www.wch-ic.com/products/WCH-Link.html) (pay attention to the "E" in the name) is a suitable device for this purpose and can be purchased commercially for around $4. This debugging tool is not only compatible with the CH32V003 but also with other WCH RISC-V and ARM-based microcontrollers.
 
-![CH32V003_wch-linke.jpg](documentation/CH32V003_wch-linke.jpg)
+![CH32V003_wch-linke.jpg](https://raw.githubusercontent.com/wagiminator/Development-Boards/main/CH32V003F4P6_DevBoard/documentation/CH32V003_wch-linke.jpg)
 
 To use the WCH-LinkE on Linux, you need to grant access permissions beforehand by executing the following commands:
 ```
